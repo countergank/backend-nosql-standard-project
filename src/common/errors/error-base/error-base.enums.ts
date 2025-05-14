@@ -4,5 +4,5 @@
 export enum ErrorBaseEnum {
   App = 'UA',
   Common = 'COM',
-  Entity = 'USR',
+  Entity = 'ETY',
 }
