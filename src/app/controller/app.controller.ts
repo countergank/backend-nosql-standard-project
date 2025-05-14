@@ -40,8 +40,8 @@ export class AppController {
   @Post('message-microservice/:message-pattern')
   async messageMicroservice(
     @Param('message-pattern') messagePattern: string,
-    @Body() body: Message<any>,
-  ): Promise<Message<any>> {
+    @Body() body: Message<unknown>,
+  ): Promise<Message<unknown>> {
     try {
       return await this.appService.messageMicroservice(messagePattern, body);
     } catch (error) {

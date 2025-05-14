@@ -6,14 +6,13 @@ services:
       - 27017
     restart: always
     ports:
-      - ${DATABASE_PORT}:${DATABASE_PORT}
+      - ${DATABASE_PORT}:27017
     volumes:
       - db-backend-nosql-standard-project-data:/data/db
     environment:
       - MONGO_INITDB_DATABASE=${DATABASE_NAME}
-      - MONGO_INITDB_BIND_IP=${DATABASE_HOST}
     networks:
-      - db-backend-nosql-standard-project-net
+      - default
 
   api-backend-nosql-standard-project:
     image: countergank/backend-nosql-standard-project:${NODE_ENV}-${VERSION}
@@ -25,8 +24,6 @@ services:
       target: development
     depends_on:
       - db-backend-nosql-standard-project
-    links:
-      - db-backend-nosql-standard-project
     command: npm run start:debug
     ports:
       - ${PORT}:${PORT}
@@ -35,20 +32,17 @@ services:
     volumes:
       - .:/usr/src/app
     networks:
-      - api-backend-nosql-standard-project-net
-      # - microservice-name-net
+      - default
 
 volumes:
   db-backend-nosql-standard-project-data:
     driver: local
 
 networks:
-  api-backend-nosql-standard-project-net:
-    name: api-backend-nosql-standard-project-net
+  default:
+    name: backend-nosql-standard-project-net
     driver: bridge
-  db-backend-nosql-standard-project-net:
-    name: db-backend-nosql-standard-project-net
-    driver: bridge
+
   # microservice-name-net:
   #   name: microservice-name-net
   #   external: true
