@@ -48,9 +48,9 @@ describe('Package.json NestJS Versions', () => {
       expect(version).toMatch(/^\^11\./);
     });
 
-    it('should have @nestjs/swagger v8', () => {
+    it('should have @nestjs/swagger v11', () => {
       const version = packageJson.dependencies['@nestjs/swagger'];
-      expect(version).toMatch(/^\^8\./);
+      expect(version).toMatch(/^\^11\./);
     });
   });
 
