@@ -43,8 +43,7 @@
         "noDoubleEquals": "off",
         "noCatchAssign": "off"
       }
-    },
-    "ignore": ["**/.eslintrc.js"]
+    }
   },
   "javascript": {
     "parser": {
