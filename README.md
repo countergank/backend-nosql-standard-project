@@ -54,12 +54,28 @@ npm_package_version=1.0.0
 
 El backend puede conectarse a microservicios externos si la variable `*_MICROSERVICE_ENABLED` está en `true`. La conexión se realiza automáticamente al iniciar la aplicación.
 
+## Agent Skills
+
+Este proyecto incluye skills de agentes AI instalados desde [countergank/skills](https://github.com/countergank/skills):
+
+- **nestjs-backend**: Patrones y mejores prácticas para desarrollo NestJS
+- **github-conventions**: Convenciones de commits, PRs y branching
+- **git-environment-flow**: Flujo de ramas de entorno y promoción
+
+Las skills se instalan en `.agents/skills/` (no `.opencode/skills/`). Para reinstalar:
+
+```bash
+npm run install:skills
+```
+
+**Nota**: El CLI `npx skills` instala en `.agents/skills/` para OpenCode. Si usás otros agentes (Claude Code, etc.), pueden usar `.claude/skills/` (excluido de git via `.gitignore`).
+
 ## Scripts
 
 - `npm run start`: Inicia el servidor en modo desarrollo.
 - `npm run build`: Compila el proyecto.
 - `npm run test`: Ejecuta las pruebas unitarias.
-- También puedes utilizar el script `scripts/docker-redeploy.sh` para construir y desplegar el proyecto usando Docker.
+- `npm run install:skills`: Reinstala las skills del agente AI.
 
 ## Pruebas
 
