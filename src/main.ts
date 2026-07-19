@@ -24,7 +24,10 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
+  app.enableCors({
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
   app.enableVersioning({ type: VersioningType.URI });
 
   await app.register(fastifyHelmet);
