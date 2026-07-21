@@ -47,14 +47,5 @@ jobs:
 
       - run: npm ci
 
-      - uses: dopplerhq/cli-action@v1
-
-      - name: Run tests with Doppler (if token available)
-        if: ${{ secrets.DOPPLER_SERVICE_TOKEN != '' }}
-        env:
-          DOPPLER_SERVICE_TOKEN: ${{ secrets.DOPPLER_SERVICE_TOKEN }}
-        run: doppler run npm test
-
-      - name: Run tests without Doppler
-        if: ${{ secrets.DOPPLER_SERVICE_TOKEN == '' }}
+      - name: Run tests
         run: npm test
