@@ -47,15 +47,9 @@ jobs:
 
       - run: npm ci
 
-      - name: Install Doppler CLI
-        run: |
-          curl -sLf https://dl.doppler.com/cli/install.sh | sudo sh
-          which doppler || echo "Doppler not in PATH, checking common locations..."
-          ls -la /usr/local/bin/doppler 2>/dev/null || ls -la /usr/bin/doppler 2>/dev/null || echo "Doppler binary not found"
+      - uses: dopplerhq/cli-action@v1
 
       - name: Run tests with Doppler
         env:
           DOPPLER_SERVICE_TOKEN: ${{ secrets.DOPPLER_SERVICE_TOKEN }}
-        run: |
-          export PATH=$PATH:/usr/local/bin
-          doppler run npm test
+        run: doppler run npm test
