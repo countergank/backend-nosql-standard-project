@@ -48,9 +48,7 @@ jobs:
       - run: npm ci
 
       - name: Install Doppler CLI
-        run: |
-          curl -sLf https://dl.doppler.com/cli/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        run: curl -sLf https://dl.doppler.com/cli/install.sh | sudo sh
 
       - name: Run tests with Doppler
         env:
