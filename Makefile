@@ -23,7 +23,7 @@ install: ## Install dependencies (npm ci)
 	npm ci
 
 dev: ## Start development server
-	NODE_ENV=$(NODE_ENV) npm run start:dev
+	@export NODE_ENV=$(NODE_ENV); if which doppler >/dev/null 2>&1; then doppler run npm run start:dev; else echo "Warning: doppler not found, falling back to npm run start:dev"; npm run start:dev; fi
 
 build: ## Build the project
 	NODE_ENV=$(NODE_ENV) VERSION=$(VERSION) npm run build
