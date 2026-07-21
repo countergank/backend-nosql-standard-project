@@ -50,6 +50,73 @@ npm_package_name=countergank-backend
 npm_package_version=1.0.0
 ```
 
+## Doppler Setup
+
+Este proyecto usa [Doppler](https://www.doppler.com/) para gestionar secretos de forma segura. Los secretos sensibles (como `DATABASE_PASSWORD` y `ENCRYPTION_PASSWORD`) se inyectan en runtime mediante `doppler run`, sin escribirse en disco ni embebidos en la imagen Docker.
+
+### Requisitos previos
+
+- Crear una cuenta en [Doppler](https://dashboard.doppler.com/)
+- Instalar el CLI: `curl -FsSL https://dl.doppler.com/cli/install.sh | sh`
+
+### Configuración inicial
+
+```bash
+# 1. Login en Doppler
+doppler login
+
+# 2. Inicializar el proyecto (desde la raíz del repo)
+doppler init
+
+# 3. Configurar los secretos necesarios
+doppler secrets set DATABASE_PASSWORD=tu_password
+doppler secrets set ENCRYPTION_PASSWORD=tu_password
+doppler secrets set MONGO_URI=mongodb://localhost:27017/countergank
+doppler secrets set NODE_ENV=development
+
+# 4. Verificar que funciona
+doppler run node -e "console.log(process.env.DATABASE_PASSWORD)"
+```
+
+### Desarrollo local
+
+```bash
+# Con Doppler instalado (recomendado)
+make dev
+
+# Sin Doppler (fallback automático con warning)
+make dev
+```
+
+El target `dev` del Makefile detecta automáticamente si Doppler está instalado y usa `doppler run` si está disponible, o cae en fallback directo con un mensaje de advertencia.
+
+### Docker
+
+```bash
+# La imagen de producción usa doppler run como CMD
+docker compose up
+
+# El token se pasa desde el host
+DOPPLER_TOKEN=tu_token docker compose up
+```
+
+### Migración desde `.env`
+
+Si tenés secretos existentes en archivos `.env`, importalos a Doppler:
+
+```bash
+# Importar secretos individuales
+doppler secrets set DATABASE_USER=usuario
+doppler secrets set DATABASE_PASSWORD=password
+
+# O importar desde archivo .env (sin las líneas de comentarios)
+grep -v '^#' .env | grep -v '^\s*$' | while IFS='=' read -r key value; do
+  doppler secrets set "$key=$value"
+done
+```
+
+**Nota**: Las variables no secretas (`VERSION`, `HOST`, `PORT`, `NODE_ENV`, etc.) pueden quedarse en `.env` o pasarse como variables de entorno directamente.
+
 ## Uso de microservicios
 
 El backend puede conectarse a microservicios externos si la variable `*_MICROSERVICE_ENABLED` está en `true`. La conexión se realiza automáticamente al iniciar la aplicación.

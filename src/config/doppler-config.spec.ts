@@ -23,6 +23,15 @@ describe('Doppler Configuration', () => {
       expect(alpineLineIndex).toBeGreaterThan(-1);
       expect(dopplerLineIndex).toBeGreaterThan(alpineLineIndex);
     });
+
+    it('should be in the base stage (shared by all stages)', () => {
+      const baseSection = dockerfileContent.split('DEVELOPMENT STAGE')[0];
+      expect(baseSection).toContain('doppler.com/cli/install.sh');
+    });
+
+    it('should use curl with silent and follow-redirects flags', () => {
+      expect(dockerfileContent).toMatch(/curl -sLf/);
+    });
   });
 
   describe('Production CMD', () => {
@@ -30,6 +39,30 @@ describe('Doppler Configuration', () => {
       const productionSection = dockerfileContent.split('PRODUCTION STAGE')[1];
       expect(productionSection).toBeDefined();
       expect(productionSection).toMatch(/CMD \["doppler", "run", "--", "node", "dist\/main\.js"\]/);
+    });
+
+    it('should NOT use bare node command in production CMD', () => {
+      const productionSection = dockerfileContent.split('PRODUCTION STAGE')[1];
+      expect(productionSection).toBeDefined();
+      // Should not have CMD ["node", "dist/main.js"] without doppler
+      expect(productionSection).not.toMatch(/CMD \["node", "dist\/main\.js"\]/);
+    });
+  });
+
+  describe('Development Stage CMD', () => {
+    it('should NOT use doppler run in development CMD', () => {
+      const developmentSection = dockerfileContent.split('DEVELOPMENT STAGE')[1]
+        .split('BUILD STAGE')[0];
+      expect(developmentSection).toBeDefined();
+      // Development uses npm run start:dev directly (docker-compose handles Doppler via DOPPLER_TOKEN)
+      expect(developmentSection).not.toMatch(/doppler run/);
+    });
+  });
+
+  describe('Docker Build without network (Doppler binary)', () => {
+    it('should install Doppler CLI during build, not runtime', () => {
+      // The RUN instruction with curl should be in the Dockerfile (build time)
+      expect(dockerfileContent).toMatch(/RUN curl -sLf https:\/\/dl\.doppler\.com\/cli\/install\.sh \| sh/);
     });
   });
 });
