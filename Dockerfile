@@ -7,7 +7,9 @@ FROM node:20-alpine AS base
 WORKDIR /usr/src/app
 
 # Install dependencies needed for node-gyp and others (optional)
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ curl
+# Install Doppler CLI for secrets management
+RUN curl -sLf https://dl.doppler.com/cli/install.sh | sh
 
 ###################################
 # DEVELOPMENT STAGE
@@ -66,4 +68,4 @@ USER node
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s CMD node -e "require('http').get('http://localhost:3000/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 # Start the server
-CMD ["node", "dist/main.js"]
+CMD ["doppler", "run", "--", "node", "dist/main.js"]
