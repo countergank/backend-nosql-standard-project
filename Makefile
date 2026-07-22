@@ -50,3 +50,6 @@ docker-logs: ## Follow container logs
 	$(COMPOSE) logs -f
 
 docker-redeploy: docker-down docker-build docker-up ## Down, rebuild, and restart containers
+
+docker-health: ## Display service health status
+	$(COMPOSE) ps --format "table {{.Name}}\t{{.Status}}"

@@ -3,9 +3,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   InternalServerErrorException,
   Param,
   Post,
+  ServiceUnavailableException,
   VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -15,12 +18,23 @@ import { GetVersionDoc, PostMessageMicroserviceDoc } from '../api-docs/app.decor
 import { Version } from '../class/version.class';
 import { AppVersionNotFoundError } from '../errors/error-instances.error';
 import { AppService } from '../service/app.service';
+import { HealthStatus } from '../service/app.service';
 
 @ApiTags('Root')
 @Controller({ version: [VERSION_NEUTRAL] })
 export class AppController {
   private readonly logger = new CustomLogger(AppController.name);
   constructor(private readonly appService: AppService) {}
+
+  @Get('health')
+  @HttpCode(HttpStatus.OK)
+  async getHealth(): Promise<HealthStatus> {
+    const result = await this.appService.getHealth();
+    if (result.status === 'error') {
+      throw new ServiceUnavailableException(result);
+    }
+    return result;
+  }
 
   @GetVersionDoc()
   @Get()

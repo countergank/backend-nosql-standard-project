@@ -1,12 +1,22 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectConnection } from '@nestjs/mongoose';
 import { ClientProxy } from '@nestjs/microservices';
+import { Connection } from 'mongoose';
 import { lastValueFrom } from 'rxjs';
 import { Message } from '../../common/class/message.class';
 import { versionStructure } from '../../common/utils/global';
 import { MicroservicesNames } from '../../config/custom-providers/microservices-names.enum';
 import { Version } from '../class/version.class';
 import { AppVersionNotFoundError } from '../errors/error-instances.error';
+
+export interface HealthStatus {
+  status: 'ok' | 'error';
+  timestamp: string;
+  services: {
+    mongodb: 'connected' | 'unavailable';
+  };
+}
 
 @Injectable()
 export class AppService {
@@ -15,6 +25,7 @@ export class AppService {
   constructor(
     private readonly configService: ConfigService,
     @Optional() @Inject(MicroservicesNames.EXAMPLE) private client: ClientProxy,
+    @InjectConnection() private readonly connection: Connection,
   ) {
     // Lee la variable de entorno para saber si el microservicio está habilitado
     const enabled = this.configService.getOrThrow(`${MicroservicesNames.EXAMPLE}_MICROSERVICE_ENABLED`);
@@ -25,6 +36,17 @@ export class AppService {
     if (this.microserviceEnabled && this.client) {
       await this.client.connect();
     }
+  }
+
+  async getHealth(): Promise<HealthStatus> {
+    const isConnected = this.connection.readyState === 1;
+    return {
+      status: isConnected ? 'ok' : 'error',
+      timestamp: new Date().toISOString(),
+      services: {
+        mongodb: isConnected ? 'connected' : 'unavailable',
+      },
+    };
   }
 
   async getVersion(): Promise<Version> {

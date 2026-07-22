@@ -1,16 +1,22 @@
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 import { Mock } from '../../../test/helpers';
 import { Version } from '../class/version.class';
 import { AppVersionNotFoundError } from '../errors/error-instances.error';
 import { VersionMock } from '../mocks/version.mock';
-import { AppService } from '../service/app.service';
+import { AppService, HealthStatus } from '../service/app.service';
 import { AppController } from './app.controller';
 
 describe(AppController.name, () => {
   let controller: AppController;
   let appService: AppService;
+
+  const mockConnection = {
+    readyState: 1, // connected by default
+  } as Connection;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,6 +49,10 @@ describe(AppController.name, () => {
             },
           },
         },
+        {
+          provide: getConnectionToken(),
+          useValue: mockConnection,
+        },
       ],
     })
       .useMocker((token) => {
@@ -72,6 +82,33 @@ describe(AppController.name, () => {
     it(`should return ${InternalServerErrorException.name}`, async () => {
       jest.spyOn(appService, 'getVersion').mockRejectedValueOnce(new InternalServerErrorException());
       await expect(controller.getVersion()).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe(`${AppController.prototype.getHealth.name}`, () => {
+    it('should return health status from service', async () => {
+      const healthResult: HealthStatus = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        services: { mongodb: 'connected' },
+      };
+      jest.spyOn(appService, 'getHealth').mockResolvedValue(healthResult);
+
+      const result = await controller.getHealth();
+
+      expect(result).toEqual(healthResult);
+      expect(appService.getHealth).toHaveBeenCalled();
+    });
+
+    it('should return error status when service returns error', async () => {
+      const healthResult: HealthStatus = {
+        status: 'error',
+        timestamp: new Date().toISOString(),
+        services: { mongodb: 'unavailable' },
+      };
+      jest.spyOn(appService, 'getHealth').mockResolvedValue(healthResult);
+
+      await expect(controller.getHealth()).rejects.toThrow(ServiceUnavailableException);
     });
   });
 });
