@@ -62,7 +62,7 @@ describe('Doppler Documentation', () => {
     });
 
     it('should explain that sensitive secrets should use Doppler', () => {
-      expect(envExampleContent).toMatch(/DATABASE_PASSWORD/);
+      expect(envExampleContent).toMatch(/Doppler/i);
     });
 
     it('should reference README for setup instructions', () => {
