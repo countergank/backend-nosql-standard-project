@@ -1,0 +1,23 @@
+name: 'Setup Node.js'
+description: 'Checkout, setup Node from .nvmrc, cache npm, install deps'
+inputs:
+  fetch-depth:
+    description: 'Git fetch depth (0 for full history)'
+    default: '1'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+    - uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: npm ci
+      shell: bash
