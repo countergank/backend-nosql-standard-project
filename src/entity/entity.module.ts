@@ -12,4 +12,4 @@ import { EntityService } from './service/entity.service';
   providers: [EncodeService, EntityRepository, EntityService],
   exports: [EntityService],
 })
-export class EntityModule { }
+export class EntityModule {}

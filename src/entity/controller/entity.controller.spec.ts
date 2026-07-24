@@ -4,7 +4,11 @@ import { Mock } from '../../../test/helpers';
 import { CreateEntityResponseDTO } from '../dto/create-entity-response.dto';
 import { EntityDTO } from '../dto/entity.dto';
 import { Entity } from '../entities/entity.entity';
-import { EntityEmailAlreadyExistsError, EntityNameAlreadyExistsError, EntityNotFoundError } from '../errors/error-instances.error';
+import {
+  EntityEmailAlreadyExistsError,
+  EntityNameAlreadyExistsError,
+  EntityNotFoundError,
+} from '../errors/error-instances.error';
 import { CreateEntityDTOMock } from '../mocks/create-entity-dto.mock';
 import { EntityMock } from '../mocks/entity.mock';
 import { EntityService } from '../service/entity.service';

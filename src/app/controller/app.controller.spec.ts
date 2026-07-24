@@ -1,7 +1,7 @@
 import { BadRequestException, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
 import { getConnectionToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
 import { Mock } from '../../../test/helpers';
 import { Version } from '../class/version.class';

@@ -10,7 +10,10 @@ import { EntityPopulateError } from '../errors/error-instances.error';
 @Injectable()
 export class EntityRepository implements OnApplicationBootstrap {
   private readonly logger = new CustomLogger(EntityRepository.name);
-  constructor(@InjectModel(Entity.name) private entityModel: Model<Entity>, private readonly encodeService: EncodeService) { }
+  constructor(
+    @InjectModel(Entity.name) private entityModel: Model<Entity>,
+    private readonly encodeService: EncodeService,
+  ) {}
 
   onApplicationBootstrap() {
     if (isLocal()) {

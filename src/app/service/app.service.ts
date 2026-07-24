@@ -1,7 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectConnection } from '@nestjs/mongoose';
 import { ClientProxy } from '@nestjs/microservices';
+import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { lastValueFrom } from 'rxjs';
 import { Message } from '../../common/class/message.class';

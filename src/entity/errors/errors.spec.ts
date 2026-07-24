@@ -1,6 +1,9 @@
-import { EntityEmailAlreadyExistsError, EntityNameAlreadyExistsError, EntityNotFoundError } from "./error-instances.error";
-import { ErrorCodes, ErrorMessages } from "./error.dictionary";
-
+import {
+  EntityEmailAlreadyExistsError,
+  EntityNameAlreadyExistsError,
+  EntityNotFoundError,
+} from './error-instances.error';
+import { ErrorCodes, ErrorMessages } from './error.dictionary';
 
 describe(EntityEmailAlreadyExistsError.name, () => {
   it(`should create an instance of ${EntityEmailAlreadyExistsError.name}`, () => {

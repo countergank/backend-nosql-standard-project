@@ -1,4 +1,10 @@
-import { EntityEmailAlreadyExistsError, EntityError, EntityNameAlreadyExistsError, EntityNotFoundError, EntityPopulateError } from './error-instances.error';
+import {
+  EntityEmailAlreadyExistsError,
+  EntityError,
+  EntityNameAlreadyExistsError,
+  EntityNotFoundError,
+  EntityPopulateError,
+} from './error-instances.error';
 import { ErrorCodes, ErrorMessages } from './error.dictionary';
 
 describe(EntityError.name, () => {

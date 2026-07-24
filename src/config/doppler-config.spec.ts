@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('Doppler Configuration', () => {
   const dockerfilePath = path.resolve(__dirname, '../../Dockerfile');
@@ -18,8 +18,8 @@ describe('Doppler Configuration', () => {
 
     it('should have Doppler CLI install after existing Alpine packages', () => {
       const lines = dockerfileContent.split('\n');
-      const alpineLineIndex = lines.findIndex(line => line.includes('apk add'));
-      const dopplerLineIndex = lines.findIndex(line => line.includes('doppler.com/cli/install.sh'));
+      const alpineLineIndex = lines.findIndex((line) => line.includes('apk add'));
+      const dopplerLineIndex = lines.findIndex((line) => line.includes('doppler.com/cli/install.sh'));
       expect(alpineLineIndex).toBeGreaterThan(-1);
       expect(dopplerLineIndex).toBeGreaterThan(alpineLineIndex);
     });
@@ -51,8 +51,7 @@ describe('Doppler Configuration', () => {
 
   describe('Development Stage CMD', () => {
     it('should NOT use doppler run in development CMD', () => {
-      const developmentSection = dockerfileContent.split('DEVELOPMENT STAGE')[1]
-        .split('BUILD STAGE')[0];
+      const developmentSection = dockerfileContent.split('DEVELOPMENT STAGE')[1].split('BUILD STAGE')[0];
       expect(developmentSection).toBeDefined();
       // Development uses npm run start:dev directly (docker-compose handles Doppler via DOPPLER_TOKEN)
       expect(developmentSection).not.toMatch(/doppler run/);

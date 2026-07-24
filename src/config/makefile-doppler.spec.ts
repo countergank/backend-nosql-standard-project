@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('Makefile Doppler Integration', () => {
   const makefilePath = path.resolve(__dirname, '../../Makefile');
@@ -35,7 +35,7 @@ describe('Makefile Doppler Integration', () => {
   describe('Fallback Behavior (no Doppler)', () => {
     it('should run npm script directly as fallback', () => {
       // The fallback path should run npm run start:dev
-      const devLine = makefileContent.split('\n').find(line => line.includes('doppler run'));
+      const devLine = makefileContent.split('\n').find((line) => line.includes('doppler run'));
       expect(devLine).toBeDefined();
       expect(devLine).toContain('npm run start:dev');
     });
