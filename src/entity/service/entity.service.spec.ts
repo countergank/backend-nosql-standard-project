@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Mock } from '../../../test/helpers';
+import { DomainError } from '../../common/errors/domain.error';
 import { Entity } from '../entities/entity.entity';
-import {
-  EntityEmailAlreadyExistsError,
-  EntityNameAlreadyExistsError,
-  EntityNotFoundError,
-} from '../errors/error-instances.error';
 import { CreateEntityDTOMock } from '../mocks/create-entity-dto.mock';
 import { EntityMock } from '../mocks/entity.mock';
 import { EntityRepository } from '../repository/entity.repository';
@@ -48,15 +44,15 @@ describe(EntityService.name, () => {
       jest.spyOn(entityRepository, 'create').mockResolvedValue(entity);
       await expect(service.create(createDto)).resolves.toBeInstanceOf(Entity);
     });
-    it(`should return a ${EntityEmailAlreadyExistsError.name}`, async () => {
+    it('should throw EmailAlreadyExists error', async () => {
       jest.spyOn(entityRepository, 'existsByName').mockResolvedValue(false);
       jest.spyOn(entityRepository, 'existsByEmail').mockResolvedValue(true);
-      await expect(service.create(createDto)).rejects.toBeInstanceOf(EntityEmailAlreadyExistsError);
+      await expect(service.create(createDto)).rejects.toBeInstanceOf(DomainError);
     });
-    it(`should return a ${EntityNameAlreadyExistsError.name}`, async () => {
+    it('should throw NameAlreadyExists error', async () => {
       jest.spyOn(entityRepository, 'existsByName').mockResolvedValue(true);
       jest.spyOn(entityRepository, 'existsByEmail').mockResolvedValue(false);
-      await expect(service.create(createDto)).rejects.toBeInstanceOf(EntityNameAlreadyExistsError);
+      await expect(service.create(createDto)).rejects.toBeInstanceOf(DomainError);
     });
   });
 
@@ -74,9 +70,9 @@ describe(EntityService.name, () => {
       jest.spyOn(entityRepository, 'findById').mockResolvedValue(entity);
       await expect(service.findById(entity.id)).resolves.toBeInstanceOf(Entity);
     });
-    it(`should return a ${EntityNotFoundError.name}`, async () => {
+    it('should throw NotFound error', async () => {
       jest.spyOn(entityRepository, 'findById').mockResolvedValue(undefined);
-      await expect(service.findById(entity.id)).rejects.toBeInstanceOf(EntityNotFoundError);
+      await expect(service.findById(entity.id)).rejects.toBeInstanceOf(DomainError);
     });
   });
 });

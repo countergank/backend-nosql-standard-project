@@ -3,8 +3,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
+import { DomainError } from '../../common/errors/domain.error';
 import { MicroservicesNames } from '../../config/custom-providers/microservices-names.enum';
-import { AppVersionNotFoundError } from '../errors/error-instances.error';
 import { VersionMock } from '../mocks/version.mock';
 import { AppService } from './app.service';
 
@@ -32,7 +32,7 @@ describe(AppService.name, () => {
           useValue: {
             getOrThrow: (key: string) => {
               if (!(key in mockConfig)) {
-                throw new AppVersionNotFoundError();
+                throw DomainError.fromKind('APP_VERSION_NOT_FOUND');
               }
               return mockConfig[key];
             },
@@ -65,14 +65,14 @@ describe(AppService.name, () => {
     it('should throw AppVersionNotFoundError if required config is missing', async () => {
       jest.spyOn(configService, 'getOrThrow').mockImplementation((key: string) => {
         if (['npm_package_version', 'NODE_ENV', 'npm_package_name'].includes(key)) {
-          throw new AppVersionNotFoundError();
+          throw DomainError.fromKind('APP_VERSION_NOT_FOUND');
         }
         return mockConfig[key];
       });
       const badConfigService = {
         getOrThrow: (key: string) => {
           if (key === 'npm_package_name' || key === 'NODE_ENV' || key === 'npm_package_version') {
-            throw new AppVersionNotFoundError();
+            throw DomainError.fromKind('APP_VERSION_NOT_FOUND');
           }
           return mockConfig[key];
         },
@@ -89,7 +89,7 @@ describe(AppService.name, () => {
 
       const serviceWithMissingConfig = module.get<AppService>(AppService);
 
-      await expect(serviceWithMissingConfig.getVersion()).rejects.toBeInstanceOf(AppVersionNotFoundError);
+      await expect(serviceWithMissingConfig.getVersion()).rejects.toBeInstanceOf(DomainError);
     });
   });
 

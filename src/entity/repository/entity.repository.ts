@@ -1,11 +1,11 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { DomainError } from '../../common/errors/domain.error';
 import { CustomLogger } from '../../common/logger';
 import { isLocal } from '../../common/utils';
 import { EncodeService } from '../../encode/encode.service';
 import { Entity } from '../entities/entity.entity';
-import { EntityPopulateError } from '../errors/error-instances.error';
 
 @Injectable()
 export class EntityRepository implements OnApplicationBootstrap {
@@ -32,7 +32,7 @@ export class EntityRepository implements OnApplicationBootstrap {
       });
     } catch (error) {
       this.logger.error(error);
-      throw new EntityPopulateError(error);
+      throw DomainError.fromKind('ENTITY_POPULATE', error);
     }
   }
 

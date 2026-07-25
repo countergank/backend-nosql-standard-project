@@ -3,7 +3,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { EntityNotFoundError } from '../../entity/errors/error-instances.error';
+import { DomainError } from '../errors/domain.error';
 import { TraceIdMiddleware } from '../middleware/trace-id.middleware';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
@@ -11,7 +11,7 @@ import { AllExceptionsFilter } from './all-exceptions.filter';
 class TestErrorController {
   @Get('not-found')
   throwEntityNotFound(): void {
-    throw new EntityNotFoundError();
+    throw DomainError.fromKind('ENTITY_NOT_FOUND');
   }
 
   @Get('http-error')
@@ -65,14 +65,14 @@ describe('Error Handling Integration', () => {
   });
 
   describe('ErrorResponseDto envelope', () => {
-    it('should return 404 envelope for ErrorBase subclasses', async () => {
+    it('should return 404 envelope for DomainError', async () => {
       const response = await request(app.getHttpServer()).get('/test/not-found');
 
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
       expect(response.body).toMatchObject({
         statusCode: HttpStatus.NOT_FOUND,
         message: expect.any(String),
-        code: expect.stringContaining('ETY-001'),
+        code: 'ENTITY_NOT_FOUND',
         traceId: expect.any(String),
         timestamp: expect.any(String),
       });

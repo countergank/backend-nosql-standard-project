@@ -1,50 +1,64 @@
 import { HttpStatus } from '@nestjs/common';
-import { ErrorBase } from './error-base';
-import { ErrorBaseEnum } from './error-base.enums';
+import { DomainError, ErrorKind } from '../domain.error';
 
-class TestError extends ErrorBase {
-  constructor(error: unknown, statusCode?: number) {
-    super(ErrorBaseEnum.Common, '999', error, statusCode);
-    Object.setPrototypeOf(this, TestError.prototype);
-  }
-}
+describe(DomainError.name, () => {
+  describe('fromKind', () => {
+    it('should create a DomainError with the correct statusCode', () => {
+      const error = DomainError.fromKind('ENTITY_NOT_FOUND');
 
-describe(ErrorBase.name, () => {
-  describe('statusCode', () => {
-    it('should default to undefined when no statusCode is provided', () => {
-      const error = new TestError('Test error');
-
-      expect(error.statusCode).toBeUndefined();
-    });
-
-    it('should store the provided statusCode', () => {
-      const error = new TestError('Test error', HttpStatus.NOT_FOUND);
-
+      expect(error).toBeInstanceOf(DomainError);
+      expect(error.kind).toBe('ENTITY_NOT_FOUND');
       expect(error.statusCode).toBe(HttpStatus.NOT_FOUND);
     });
 
-    it('should include statusCode in getErrorPublic() when provided', () => {
-      const error = new TestError('Test error', HttpStatus.CONFLICT);
-      const publicError = error.getErrorPublic();
+    it('should use the registry message by default', () => {
+      const error = DomainError.fromKind('ENTITY_NAME_ALREADY_EXISTS');
 
-      expect(publicError.statusCode).toBe(HttpStatus.CONFLICT);
+      expect(error.message).toBe(ErrorKind.ENTITY_NAME_ALREADY_EXISTS.message);
     });
 
-    it('should not include statusCode in getErrorPublic() when not provided', () => {
-      const error = new TestError('Test error');
-      const publicError = error.getErrorPublic();
+    it('should accept a custom message override', () => {
+      const error = DomainError.fromKind('ENTITY_NOT_FOUND', undefined, 'Custom message');
 
-      expect(publicError.statusCode).toBeUndefined();
+      expect(error.message).toBe('Custom message');
     });
 
-    it('should preserve backward compatibility of getErrorPublic shape', () => {
-      const error = new TestError('Test error');
-      const publicError = error.getErrorPublic();
+    it('should capture cause stack when created from an Error', () => {
+      const cause = new Error('Root cause');
+      const error = DomainError.fromKind('INTERNAL_ERROR', cause);
 
-      expect(publicError).toHaveProperty('message');
-      expect(publicError).toHaveProperty('code');
-      expect(publicError.message).toBe('Test error');
-      expect(publicError.code).toContain('COM-999');
+      expect(error.stack).toBe(cause.stack);
+    });
+  });
+
+  describe('internal', () => {
+    it('should create a 500 INTERNAL_ERROR', () => {
+      const error = DomainError.internal();
+
+      expect(error.kind).toBe('INTERNAL_ERROR');
+      expect(error.statusCode).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  describe('ErrorKind registry', () => {
+    it('should have all expected error kinds', () => {
+      const kinds = Object.keys(ErrorKind);
+
+      expect(kinds).toContain('INTERNAL_ERROR');
+      expect(kinds).toContain('APP_ERROR');
+      expect(kinds).toContain('APP_VERSION_NOT_FOUND');
+      expect(kinds).toContain('ENTITY_ERROR');
+      expect(kinds).toContain('ENTITY_NOT_FOUND');
+      expect(kinds).toContain('ENTITY_NAME_ALREADY_EXISTS');
+      expect(kinds).toContain('ENTITY_EMAIL_ALREADY_EXISTS');
+      expect(kinds).toContain('ENTITY_POPULATE');
+    });
+
+    it('should have unique kind strings', () => {
+      const kindStrings = Object.values(ErrorKind).map((e) => e.kind);
+      const unique = new Set(kindStrings);
+
+      expect(unique.size).toBe(kindStrings.length);
     });
   });
 });

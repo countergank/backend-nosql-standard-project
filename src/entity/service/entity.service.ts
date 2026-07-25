@@ -1,12 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import { DomainError } from '../../common/errors/domain.error';
 import { CreateEntityDTO } from '../dto/create-entity.dto';
 import { Entity } from '../entities/entity.entity';
-import {
-  EntityEmailAlreadyExistsError,
-  EntityNameAlreadyExistsError,
-  EntityNotFoundError,
-} from '../errors/error-instances.error';
 import { EntityRepository } from '../repository/entity.repository';
 
 @Injectable()
@@ -20,10 +16,10 @@ export class EntityService {
     ]);
 
     if (entitynameAlreadyExists) {
-      throw new EntityNameAlreadyExistsError();
+      throw DomainError.fromKind('ENTITY_NAME_ALREADY_EXISTS');
     }
     if (emailAlreadyExists) {
-      throw new EntityEmailAlreadyExistsError();
+      throw DomainError.fromKind('ENTITY_EMAIL_ALREADY_EXISTS');
     }
     createEntityDTO = plainToInstance(CreateEntityDTO, createEntityDTO);
     const newEntity = createEntityDTO.toEntity();
@@ -39,7 +35,7 @@ export class EntityService {
   async findById(id: string): Promise<Entity> {
     const entity: Entity = await this.entityRepository.findById(id);
     if (!entity) {
-      throw new EntityNotFoundError();
+      throw DomainError.fromKind('ENTITY_NOT_FOUND');
     }
     return entity;
   }

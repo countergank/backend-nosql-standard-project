@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ErrorResponseDto } from '../dto/error-response.dto';
-import { ErrorBase } from '../errors/error-base/error-base';
+import { DomainError } from '../errors/domain.error';
 import { isProd } from '../utils';
 
 @Catch()
@@ -17,13 +17,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
 
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-    let code = 'UA-COM-000';
+    let code = 'INTERNAL_ERROR';
     let message = 'Internal server error';
     let details: unknown = undefined;
 
-    if (exception instanceof ErrorBase) {
-      statusCode = exception.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR;
-      code = exception.code;
+    if (exception instanceof DomainError) {
+      statusCode = exception.statusCode;
+      code = exception.kind;
       message = exception.message;
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();

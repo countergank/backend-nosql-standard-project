@@ -1,7 +1,7 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { EntityNotFoundError } from '../../entity/errors/error-instances.error';
 import { ErrorResponseDto } from '../dto/error-response.dto';
+import { DomainError } from '../errors/domain.error';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
 describe(AllExceptionsFilter.name, () => {
@@ -35,16 +35,16 @@ describe(AllExceptionsFilter.name, () => {
     });
   });
 
-  describe('ErrorBase branch', () => {
-    it('should return envelope with ErrorBase statusCode and code', () => {
-      const error = new EntityNotFoundError();
+  describe('DomainError branch', () => {
+    it('should return envelope with DomainError statusCode and kind', () => {
+      const error = DomainError.fromKind('ENTITY_NOT_FOUND');
       filter.catch(error, mockHost);
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
       expect(mockResponse.send).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: HttpStatus.NOT_FOUND,
-          code: error.code,
+          code: error.kind,
           message: error.message,
           traceId: 'test-trace-id-123',
         }),
@@ -52,7 +52,7 @@ describe(AllExceptionsFilter.name, () => {
     });
 
     it('should include timestamp in the envelope', () => {
-      const error = new EntityNotFoundError();
+      const error = DomainError.fromKind('ENTITY_NOT_FOUND');
       filter.catch(error, mockHost);
 
       const sentEnvelope = (mockResponse.send as jest.Mock).mock.calls[0][0] as ErrorResponseDto;
@@ -127,7 +127,7 @@ describe(AllExceptionsFilter.name, () => {
 
   describe('traceId handling', () => {
     it('should use request.id as traceId', () => {
-      const error = new EntityNotFoundError();
+      const error = DomainError.fromKind('ENTITY_NOT_FOUND');
       filter.catch(error, mockHost);
 
       const sentEnvelope = (mockResponse.send as jest.Mock).mock.calls[0][0] as ErrorResponseDto;
@@ -136,7 +136,7 @@ describe(AllExceptionsFilter.name, () => {
 
     it('should fallback to "unknown" when request.id is missing', () => {
       mockRequest.id = undefined;
-      const error = new EntityNotFoundError();
+      const error = DomainError.fromKind('ENTITY_NOT_FOUND');
       filter.catch(error, mockHost);
 
       const sentEnvelope = (mockResponse.send as jest.Mock).mock.calls[0][0] as ErrorResponseDto;
