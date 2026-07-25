@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('Docker Compose Doppler Configuration', () => {
   const dockerComposePath = path.resolve(__dirname, '../../docker-compose.yml');

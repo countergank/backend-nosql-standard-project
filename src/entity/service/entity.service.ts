@@ -2,12 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CreateEntityDTO } from '../dto/create-entity.dto';
 import { Entity } from '../entities/entity.entity';
-import { EntityEmailAlreadyExistsError, EntityNameAlreadyExistsError, EntityNotFoundError } from '../errors/error-instances.error';
+import {
+  EntityEmailAlreadyExistsError,
+  EntityNameAlreadyExistsError,
+  EntityNotFoundError,
+} from '../errors/error-instances.error';
 import { EntityRepository } from '../repository/entity.repository';
 
 @Injectable()
 export class EntityService {
-  constructor(private readonly entityRepository: EntityRepository) { }
+  constructor(private readonly entityRepository: EntityRepository) {}
 
   async create(createEntityDTO: CreateEntityDTO): Promise<Entity> {
     const [entitynameAlreadyExists, emailAlreadyExists] = await Promise.all([

@@ -6,14 +6,18 @@ import { CreateEntityResponseDTO } from '../dto/create-entity-response.dto';
 import { CreateEntityDTO } from '../dto/create-entity.dto';
 import { EntityDTO } from '../dto/entity.dto';
 import { Entity } from '../entities/entity.entity';
-import { EntityEmailAlreadyExistsError, EntityNameAlreadyExistsError, EntityNotFoundError } from '../errors/error-instances.error';
+import {
+  EntityEmailAlreadyExistsError,
+  EntityNameAlreadyExistsError,
+  EntityNotFoundError,
+} from '../errors/error-instances.error';
 import { EntityService } from '../service/entity.service';
 
 @ApiTags('Entity')
 @Controller({ path: 'entity', version: '1' })
 export class EntityController {
   private readonly logger = new CustomLogger(EntityController.name);
-  constructor(private readonly entityService: EntityService) { }
+  constructor(private readonly entityService: EntityService) {}
 
   @CreateEntityDoc()
   @Post('create')

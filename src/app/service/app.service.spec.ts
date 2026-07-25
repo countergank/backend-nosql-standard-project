@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
-import { Test, TestingModule } from '@nestjs/testing';
 import { getConnectionToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
 import { MicroservicesNames } from '../../config/custom-providers/microservices-names.enum';
 import { AppVersionNotFoundError } from '../errors/error-instances.error';
