@@ -7,6 +7,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import hyperid from 'hyperid';
 import { AppModule } from './app/app.module';
+import { validationPipe } from './common/pipes/validation.pipe';
 import { isProd } from './common/utils';
 
 async function bootstrap() {
@@ -43,6 +44,8 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder().setTitle(name).setDescription(description).setVersion(version).build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('/docs', app, swaggerDocument, { customSiteTitle: `${String(name).toUpperCase()} Docs` });
+
+  app.useGlobalPipes(validationPipe);
 
   await app.listen(port, host);
 }

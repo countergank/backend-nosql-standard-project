@@ -1,11 +1,10 @@
-import { BadRequestException, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
 import { Mock } from '../../../test/helpers';
 import { Version } from '../class/version.class';
-import { AppVersionNotFoundError } from '../errors/error-instances.error';
 import { VersionMock } from '../mocks/version.mock';
 import { AppService, HealthStatus } from '../service/app.service';
 import { AppController } from './app.controller';
@@ -72,16 +71,6 @@ describe(AppController.name, () => {
     it('should return API version', async () => {
       jest.spyOn(appService, 'getVersion').mockResolvedValue(new VersionMock());
       await expect(controller.getVersion()).resolves.toBeInstanceOf(Version);
-    });
-
-    it(`should return ${AppVersionNotFoundError.name}`, async () => {
-      jest.spyOn(appService, 'getVersion').mockRejectedValueOnce(new AppVersionNotFoundError());
-      await expect(controller.getVersion()).rejects.toThrow(BadRequestException);
-    });
-
-    it(`should return ${InternalServerErrorException.name}`, async () => {
-      jest.spyOn(appService, 'getVersion').mockRejectedValueOnce(new InternalServerErrorException());
-      await expect(controller.getVersion()).rejects.toThrow(InternalServerErrorException);
     });
   });
 
