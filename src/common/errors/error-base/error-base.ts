@@ -10,6 +10,7 @@ export class ErrorBase {
   public code: string;
   public timestamp: string;
   public stack: string;
+  public statusCode?: number;
   private appId: string = ErrorBaseEnum.App;
 
   /**
@@ -17,13 +18,15 @@ export class ErrorBase {
    * @param errorGroup - El grupo de error.
    * @param code - El código del error.
    * @param error - El error original.
+   * @param statusCode - Código de estado HTTP opcional.
    */
-  constructor(errorGroup: string, code: string, error: unknown) {
+  constructor(errorGroup: string, code: string, error: unknown, statusCode?: number) {
     this.errorGroup = errorGroup;
     this.message = this.extractMessage(error);
     this.code = `${this.appId}-${errorGroup}-${code}`;
     this.timestamp = new Date().toISOString();
     this.stack = this.extractStack(error);
+    this.statusCode = statusCode;
   }
 
   /**
@@ -65,10 +68,14 @@ export class ErrorBase {
    * @returns Un objeto ErrorDTO con el mensaje y el código del error.
    */
   public getErrorPublic(): IErrorPublic {
-    return {
+    const publicError: IErrorPublic = {
       message: this.message,
       code: this.code,
     };
+    if (this.statusCode !== undefined) {
+      publicError.statusCode = this.statusCode;
+    }
+    return publicError;
   }
 
   /**
@@ -76,12 +83,16 @@ export class ErrorBase {
    * @returns Un objeto IError con todos los datos del error.
    */
   public getError(): IError {
-    return {
+    const fullError: IError = {
       message: this.message,
       stack: this.stack,
       code: this.code,
       errorGroup: this.errorGroup,
       timestamp: this.timestamp,
     };
+    if (this.statusCode !== undefined) {
+      fullError.statusCode = this.statusCode;
+    }
+    return fullError;
   }
 }

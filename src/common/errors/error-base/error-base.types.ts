@@ -7,6 +7,7 @@ export type IError = {
   code: string;
   timestamp: string;
   stack: string;
+  statusCode?: number;
 };
 
 /**
@@ -15,4 +16,5 @@ export type IError = {
 export type IErrorPublic = {
   message: string;
   code: string;
+  statusCode?: number;
 };
