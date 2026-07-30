@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Mock } from '../../../test/helpers';
+import { ICACHE_SERVICE } from '../../common/cache/cache.service';
 import { DomainError } from '../../common/errors/domain.error';
 import { Entity } from '../entities/entity.entity';
 import { CreateEntityDTOMock } from '../mocks/create-entity-dto.mock';
@@ -19,7 +20,19 @@ describe(EntityService.name, () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [EntityService, EntityRepository],
+      providers: [
+        EntityService,
+        EntityRepository,
+        {
+          provide: ICACHE_SERVICE,
+          useValue: {
+            get: jest.fn().mockResolvedValue(null),
+            set: jest.fn().mockResolvedValue(undefined),
+            del: jest.fn().mockResolvedValue(undefined),
+            reset: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+      ],
     })
       .overrideProvider(EntityRepository)
       .useValue(entityRepository)

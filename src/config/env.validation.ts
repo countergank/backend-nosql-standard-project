@@ -61,6 +61,10 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   EXAMPLE_MICROSERVICE_PORT: string;
+
+  @IsString()
+  @IsOptional()
+  REDIS_URL: string;
 }
 
 export function validate(config: Record<string, unknown>) {

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Mock } from '../../../test/helpers';
+import { ICACHE_SERVICE } from '../../common/cache/cache.service';
 import { CreateEntityResponseDTO } from '../dto/create-entity-response.dto';
 import { EntityDTO } from '../dto/entity.dto';
 import { Entity } from '../entities/entity.entity';
@@ -15,7 +16,18 @@ describe(EntityController.name, () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EntityController],
-      providers: [EntityService],
+      providers: [
+        EntityService,
+        {
+          provide: ICACHE_SERVICE,
+          useValue: {
+            get: jest.fn().mockResolvedValue(null),
+            set: jest.fn().mockResolvedValue(undefined),
+            del: jest.fn().mockResolvedValue(undefined),
+            reset: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+      ],
     })
       .useMocker((token) => {
         if (typeof token === 'function') return Mock(token);
