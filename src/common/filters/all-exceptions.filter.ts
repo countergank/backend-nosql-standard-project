@@ -1,12 +1,12 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { ErrorResponseDto } from '../dto/error-response.dto';
 import { DomainError } from '../errors/domain.error';
-import { isProd } from '../utils';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  constructor(@InjectPinoLogger(AllExceptionsFilter.name) private readonly logger: PinoLogger) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -36,9 +36,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else {
         message = exception.message;
       }
-    } else if (exception instanceof Error) {
-      this.logger.error(exception.message, isProd() ? undefined : exception.stack);
     }
+
+    this.logger.error(
+      { traceId, statusCode, code, message, details, timestamp, url: request.url, method: request.method },
+      `Exception caught: ${message}`,
+    );
 
     const envelope: ErrorResponseDto = {
       statusCode,

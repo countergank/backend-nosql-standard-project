@@ -2,6 +2,7 @@ import { Controller, Get, HttpException, HttpStatus, MiddlewareConsumer, Module,
 import { APP_FILTER } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
+import { LoggerModule } from 'nestjs-pino';
 import request from 'supertest';
 import { DomainError } from '../errors/domain.error';
 import { TraceIdMiddleware } from '../middleware/trace-id.middleware';
@@ -31,6 +32,13 @@ class TestErrorController {
 }
 
 @Module({
+  imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: 'silent',
+      },
+    }),
+  ],
   controllers: [TestErrorController],
   providers: [
     {

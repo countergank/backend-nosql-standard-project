@@ -1,23 +1,23 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { DomainError } from '../../common/errors/domain.error';
-import { CustomLogger } from '../../common/logger';
 import { isLocal } from '../../common/utils';
 import { EncodeService } from '../../encode/encode.service';
 import { Entity } from '../entities/entity.entity';
 
 @Injectable()
 export class EntityRepository implements OnApplicationBootstrap {
-  private readonly logger = new CustomLogger(EntityRepository.name);
   constructor(
     @InjectModel(Entity.name) private entityModel: Model<Entity>,
     private readonly encodeService: EncodeService,
+    @InjectPinoLogger(EntityRepository.name) private readonly logger: PinoLogger,
   ) {}
 
   onApplicationBootstrap() {
     if (isLocal()) {
-      this.populateEntitys().catch((error) => this.logger.error(error));
+      this.populateEntitys().catch((error) => this.logger.error({ error }, 'Entity population failed'));
     }
   }
 
@@ -31,7 +31,7 @@ export class EntityRepository implements OnApplicationBootstrap {
         password: 'password',
       });
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error({ error }, 'Failed to populate entity');
       throw DomainError.fromKind('ENTITY_POPULATE', error);
     }
   }

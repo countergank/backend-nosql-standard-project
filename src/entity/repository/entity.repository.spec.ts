@@ -2,6 +2,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
+import { LoggerModule } from 'nestjs-pino';
 import { clearMongoCollection, clearMongoConnection, createConnection } from '../../../test/helpers';
 import { EncodeService } from '../../encode/encode.service';
 import { HashMock } from '../../encode/mocks/hash.mock';
@@ -24,6 +25,13 @@ describe(EntityRepository.name, () => {
     newMongoConnection = mongoConnection;
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        LoggerModule.forRoot({
+          pinoHttp: {
+            level: 'silent',
+          },
+        }),
+      ],
       providers: [
         EntityRepository,
         EncodeService,
