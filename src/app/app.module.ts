@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from 'nestjs-pino';
+import { CacheModule } from '../common/cache/cache.module';
 import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter';
 import { TraceIdMiddleware } from '../common/middleware/trace-id.middleware';
 import { ConfigModuleOption } from '../config/custom-module-options/config-module-option';
@@ -40,6 +41,7 @@ import { AppService } from './service/app.service';
     }),
     ConfigModule.forRoot(ConfigModuleOption),
     MongooseModule.forRootAsync({ useClass: MongooseModuleOption }),
+    CacheModule.forRoot(),
     EntityModule,
   ],
 })

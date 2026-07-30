@@ -49,9 +49,27 @@ services:
     networks:
       - default
 
+  # Redis service (optional — uncomment to enable Redis caching)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-cache
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   networks:
+  #     - default
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
 volumes:
   db-backend-nosql-standard-project-data:
     driver: local
+  # redis-data:
+  #   driver: local
 
 networks:
   default:
