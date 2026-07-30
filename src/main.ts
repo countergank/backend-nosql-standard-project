@@ -8,17 +8,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import hyperid from 'hyperid';
 import { AppModule } from './app/app.module';
 import { validationPipe } from './common/pipes/validation.pipe';
-import { isProd } from './common/utils';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
-      logger: {
-        redact: ['headers.authorization'],
-        timestamp: () => new Date().toISOString(),
-        level: isProd() ? 'info' : 'debug',
-      },
       genReqId: () => {
         return hyperid().uuid;
       },

@@ -1,17 +1,30 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { PinoLogger } from 'nestjs-pino';
 import { ErrorResponseDto } from '../dto/error-response.dto';
 import { DomainError } from '../errors/domain.error';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
 describe(AllExceptionsFilter.name, () => {
   let filter: AllExceptionsFilter;
+  let mockLogger: PinoLogger;
   let mockRequest: Partial<FastifyRequest>;
   let mockResponse: Partial<FastifyReply>;
   let mockHost: ArgumentsHost;
 
   beforeEach(() => {
-    filter = new AllExceptionsFilter();
+    mockLogger = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+      child: jest.fn(),
+      setBindings: jest.fn(),
+      level: 'silent',
+    } as unknown as PinoLogger;
+    filter = new AllExceptionsFilter(mockLogger);
 
     mockRequest = {
       id: 'test-trace-id-123',
