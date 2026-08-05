@@ -2,13 +2,24 @@ import { Inject, Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ICACHE_SERVICE, ICacheService } from '../../common/cache/cache.service';
 import { DomainError } from '../../common/errors/domain.error';
+import { Parameter } from '../../config/parameters/decorators/parameter.decorator';
 import { CreateEntityDTO } from '../dto/create-entity.dto';
 import { Entity } from '../entities/entity.entity';
 import { EntityRepository } from '../repository/entity.repository';
 
 @Injectable()
 export class EntityService {
-  private readonly cacheTtlMs = 30_000; // 30s cache for entity queries
+  /**
+   * Live cache TTL (ms) from the Parameter Store; falls back to 30s when the
+   * parameter resolves to undefined (e.g. store not ready during early
+   * bootstrap). Admin updates are picked up on the next read.
+   */
+  @Parameter('ENTITY_CACHE_TTL_MS')
+  private readonly parameterCacheTtlMs: number;
+
+  private get cacheTtlMs(): number {
+    return this.parameterCacheTtlMs ?? 30_000; // 30s cache for entity queries
+  }
 
   constructor(
     private readonly entityRepository: EntityRepository,

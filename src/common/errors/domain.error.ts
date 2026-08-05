@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { HttpStatus } from '@nestjs/common';
 
 /**
@@ -43,6 +44,23 @@ export const ErrorKind = {
     kind: 'ENTITY_POPULATE',
     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'Error Entity, al poblar base de datos.',
+  },
+
+  // ── Parameters ───────────────────────────────────────────
+  PARAMETER_NOT_FOUND: {
+    kind: 'PARAMETER_NOT_FOUND',
+    statusCode: HttpStatus.NOT_FOUND,
+    message: 'Error Parameter, el parámetro no existe.',
+  },
+  PARAMETER_ENV_OVERRIDDEN: {
+    kind: 'PARAMETER_ENV_OVERRIDDEN',
+    statusCode: HttpStatus.CONFLICT,
+    message: 'Error Parameter, el parámetro está ligado a una variable de entorno.',
+  },
+  PARAMETER_INVALID_VALUE: {
+    kind: 'PARAMETER_INVALID_VALUE',
+    statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+    message: 'Error Parameter, el valor no es válido.',
   },
 } as const;
 
@@ -92,5 +110,44 @@ export class DomainError extends Error {
   /** Create a generic 500 for unexpected errors */
   static internal(cause?: unknown, message?: string): DomainError {
     return DomainError.fromKind('INTERNAL_ERROR', cause, message);
+  }
+}
+
+/**
+ * GenericError — fallback error with an HTTP status code.
+ *
+ * Per the common-errors spec, the optional `status` parameter defaults to
+ * `HttpStatus.INTERNAL_SERVER_ERROR` (500) and is included in the public
+ * error representation via `getErrorPublic()`.
+ */
+export class GenericError extends Error {
+  readonly code: string;
+  readonly status: number;
+  readonly timestamp: string;
+  readonly traceId: string;
+
+  constructor(e?: unknown, status?: number) {
+    super(e instanceof Error ? e.message : String(e));
+    this.name = 'GenericError';
+    this.code = 'GENERIC_ERROR';
+    this.status = status ?? HttpStatus.INTERNAL_SERVER_ERROR;
+    this.timestamp = new Date().toISOString();
+    this.traceId = randomUUID();
+  }
+
+  getErrorPublic(): {
+    statusCode: number;
+    code: string;
+    message: string;
+    traceId: string;
+    timestamp: string;
+  } {
+    return {
+      statusCode: this.status,
+      code: this.code,
+      message: this.message,
+      traceId: this.traceId,
+      timestamp: this.timestamp,
+    };
   }
 }
