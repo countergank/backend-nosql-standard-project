@@ -208,7 +208,7 @@ export class ParameterStore {
     return definition;
   }
 
-  private validate(definition: ParameterDefinition<unknown>, value: string | number | boolean): void {
+  private validate(definition: ParameterDefinition<string | number | boolean>, value: string | number | boolean): void {
     this.registry.validate(definition.key, value);
   }
 
