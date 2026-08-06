@@ -26,7 +26,13 @@ async function bootstrap() {
   });
   app.enableVersioning({ type: VersioningType.URI });
 
-  await app.register(fastifyHelmet);
+  await app.register(fastifyHelmet, {
+    contentSecurityPolicy: {
+      directives: {
+        'script-src': ["'self'", "'unsafe-inline'"],
+      },
+    },
+  });
   await app.register(fastifyCompress, { encodings: ['gzip', 'deflate'] });
 
   const configService = app.get(ConfigService);
