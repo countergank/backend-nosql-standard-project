@@ -8,6 +8,7 @@ jobs:
   commitlint:
     name: Lint Commit Messages
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,6 +21,7 @@ jobs:
   lint:
     name: Biome Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
 
@@ -30,6 +32,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -40,6 +43,7 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -51,11 +55,25 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       mongo:
         image: mongo:7
         ports:
           - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: '27017'
+      DATABASE_USER: test
+      DATABASE_PASSWORD: test
+      DATABASE_NAME: backend-nosql
+      ADMIN_API_TOKEN: ci-test-token
+      NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
 
@@ -63,11 +81,3 @@ jobs:
 
       - name: Run e2e tests
         run: npm run test:e2e
-        env:
-          NODE_ENV: test
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: e2e-results
-          path: test-results/
