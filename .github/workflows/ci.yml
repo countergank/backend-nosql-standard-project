@@ -61,19 +61,6 @@ jobs:
         image: mongo:7
         ports:
           - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DATABASE_HOST: localhost
-      DATABASE_PORT: '27017'
-      DATABASE_USER: test
-      DATABASE_PASSWORD: test
-      DATABASE_NAME: backend-nosql
-      ADMIN_API_TOKEN: ci-test-token
-      NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
 
@@ -81,3 +68,11 @@ jobs:
 
       - name: Run e2e tests
         run: npm run test:e2e
+        env:
+          DATABASE_HOST: localhost
+          DATABASE_PORT: '27017'
+          DATABASE_USER: test
+          DATABASE_PASSWORD: test
+          DATABASE_NAME: backend-nosql
+          ADMIN_API_TOKEN: ci-test-token
+          NODE_ENV: test
