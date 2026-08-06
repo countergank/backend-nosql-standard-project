@@ -70,4 +70,4 @@ jobs:
           DATABASE_PASSWORD: test
           DATABASE_NAME: backend-nosql
           ADMIN_API_TOKEN: ci-test-token
-          NODE_ENV: test
+          NODE_ENV: testtest CI trigger
