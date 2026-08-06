@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Mock } from '../../../test/helpers';
 import { ICACHE_SERVICE } from '../../common/cache/cache.service';
 import { DomainError } from '../../common/errors/domain.error';
+import { ParameterService } from '../../config/parameters/parameter.service';
 import { Entity } from '../entities/entity.entity';
 import { CreateEntityDTOMock } from '../mocks/create-entity-dto.mock';
 import { EntityMock } from '../mocks/entity.mock';
@@ -19,6 +20,10 @@ describe(EntityService.name, () => {
   };
 
   beforeEach(async () => {
+    // EntityService reads ENTITY_CACHE_TTL_MS through the Parameter Store at
+    // runtime — simulate a bootstrapped store for the unit spec.
+    ParameterService.instance = { getSync: jest.fn().mockReturnValue(30_000) } as never;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntityService,
@@ -42,6 +47,10 @@ describe(EntityService.name, () => {
       .compile();
 
     service = module.get<EntityService>(EntityService);
+  });
+
+  afterEach(() => {
+    ParameterService.instance = null;
   });
 
   it(`${EntityService.name} should be defined`, () => {
