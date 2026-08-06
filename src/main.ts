@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import scalarApiReference from '@scalar/fastify-api-reference';
 import hyperid from 'hyperid';
 import { AppModule } from './app/app.module';
 import { validationPipe } from './common/pipes/validation.pipe';
@@ -25,7 +26,13 @@ async function bootstrap() {
   });
   app.enableVersioning({ type: VersioningType.URI });
 
-  await app.register(fastifyHelmet);
+  await app.register(fastifyHelmet, {
+    contentSecurityPolicy: {
+      directives: {
+        'script-src': ["'self'", "'unsafe-inline'"],
+      },
+    },
+  });
   await app.register(fastifyCompress, { encodings: ['gzip', 'deflate'] });
 
   const configService = app.get(ConfigService);
@@ -38,6 +45,9 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder().setTitle(name).setDescription(description).setVersion(version).build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('/docs', app, swaggerDocument, { customSiteTitle: `${String(name).toUpperCase()} Docs` });
+  await app.register(scalarApiReference, {
+    configuration: { content: swaggerDocument },
+  });
 
   app.useGlobalPipes(validationPipe);
 
