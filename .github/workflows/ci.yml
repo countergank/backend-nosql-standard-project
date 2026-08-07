@@ -69,5 +69,5 @@ jobs:
           DATABASE_USER: test
           DATABASE_PASSWORD: test
           DATABASE_NAME: backend-nosql
-          ADMIN_API_TOKEN: ci-test-token
+          ADMIN_API_TOKEN: e2e-admin-token
           NODE_ENV: test
