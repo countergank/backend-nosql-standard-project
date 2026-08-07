@@ -21,7 +21,7 @@ services:
       - default
 
   api-backend-nosql-standard-project:
-    image: ghcr.io/countergank/backend-nosql-standard-project:${NODE_ENV}-${VERSION}
+    image: countergank/backend-nosql-standard-project:${NODE_ENV}-${VERSION}
     container_name: api-backend-nosql-standard-project
     restart: always
     build:
