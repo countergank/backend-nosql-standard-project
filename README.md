@@ -78,6 +78,22 @@ doppler secrets set ENCRYPTION_PASSWORD=tu_password
 
 El target `make dev` detecta Doppler automáticamente y usa `doppler run` si está disponible.
 
+### Migración desde `.env`
+
+Si tenés secretos en un `.env` existente, importalos a Doppler:
+
+```bash
+doppler secrets set DATABASE_USER=usuario
+doppler secrets set DATABASE_PASSWORD=password
+
+# O importar todas las líneas no comentadas de .env
+grep -v '^#' .env | grep -v '^\s*$' | while IFS='=' read -r key value; do
+  doppler secrets set "$key=$value"
+done
+```
+
+Las variables no secretas (`HOST`, `PORT`, `NODE_ENV`, etc.) pueden quedarse en `.env` o pasarse como variables de entorno directamente.
+
 ## Ejecutar
 
 ```bash
