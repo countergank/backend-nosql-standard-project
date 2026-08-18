@@ -30,7 +30,9 @@ describe('AppController (e2e)', () => {
   });
 
   it('/ (GET version)', async () => {
-    await request(httpServer).get('/').expect(200);
+    const res = await request(httpServer).get('/').expect(200);
+
+    expect(res.body).toHaveProperty('version');
   });
 
   it('/health (GET health check)', async () => {
@@ -39,5 +41,11 @@ describe('AppController (e2e)', () => {
     expect(res.body).toMatchObject({ status: 'ok' });
     expect(res.body).toHaveProperty('services');
     expect(res.body.services).toHaveProperty('mongodb');
+  });
+
+  it('/message-microservice/:pattern (POST disabled microservice)', async () => {
+    const res = await request(httpServer).post('/message-microservice/test-pattern').send({ data: 'test' }).expect(500);
+
+    expect(res.body).toMatchObject({ statusCode: 500, code: 'APP_ERROR' });
   });
 });
