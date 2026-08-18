@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
 import { LoggerModule } from 'nestjs-pino';
-import { clearMongoCollection, clearMongoConnection, createConnection } from '../../../test/helpers';
+import { clearMongoCollection, clearMongoConnection, createConnection } from '../../../test/helpers/mongo';
 import { EncodeService } from '../../encode/encode.service';
 import { HashMock } from '../../encode/mocks/hash.mock';
 import { Entity, EntitySchema } from '../entities/entity.entity';

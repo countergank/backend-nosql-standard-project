@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Mock } from '../../../test/helpers';
+import { Mock } from '../../../test/helpers/mock';
 import { ICACHE_SERVICE } from '../../common/cache/cache.service';
 import { DomainError } from '../../common/errors/domain.error';
 import { ParameterService } from '../../config/parameters/parameter.service';

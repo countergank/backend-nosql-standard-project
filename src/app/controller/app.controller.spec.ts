@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
-import { Mock } from '../../../test/helpers';
+import { Mock } from '../../../test/helpers/mock';
 import { Version } from '../class/version.class';
 import { VersionMock } from '../mocks/version.mock';
 import { AppService, HealthStatus } from '../service/app.service';
