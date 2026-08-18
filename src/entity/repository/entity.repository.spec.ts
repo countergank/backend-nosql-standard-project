@@ -76,10 +76,10 @@ describe(EntityRepository.name, () => {
     });
   });
 
-  describe(`${EntityRepository.name}.${EntityRepository.prototype.existsByName.name}`, () => {
+  describe(`${EntityRepository.name}.${EntityRepository.prototype.existsByUserName.name}`, () => {
     it(`should be return if ${Entity.name} exists by name`, async () => {
       const entity = await repository.create(new EntityMock());
-      await expect(repository.existsByName(entity.name)).resolves.toBe(true);
+      await expect(repository.existsByUserName(entity.userName)).resolves.toBe(true);
     });
   });
 

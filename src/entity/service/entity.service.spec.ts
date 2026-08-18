@@ -12,7 +12,7 @@ import { EntityService } from './entity.service';
 describe(EntityService.name, () => {
   let service: EntityService;
   const entityRepository = {
-    existsByName: jest.fn(),
+    existsByUserName: jest.fn(),
     existsByEmail: jest.fn(),
     create: jest.fn(),
     findById: jest.fn(),
@@ -61,18 +61,18 @@ describe(EntityService.name, () => {
     const createDto = new CreateEntityDTOMock();
     const entity = new EntityMock();
     it(`should be create a ${Entity.name}`, async () => {
-      jest.spyOn(entityRepository, 'existsByName').mockResolvedValue(false);
+      jest.spyOn(entityRepository, 'existsByUserName').mockResolvedValue(false);
       jest.spyOn(entityRepository, 'existsByEmail').mockResolvedValue(false);
       jest.spyOn(entityRepository, 'create').mockResolvedValue(entity);
       await expect(service.create(createDto)).resolves.toBeInstanceOf(Entity);
     });
     it('should throw EmailAlreadyExists error', async () => {
-      jest.spyOn(entityRepository, 'existsByName').mockResolvedValue(false);
+      jest.spyOn(entityRepository, 'existsByUserName').mockResolvedValue(false);
       jest.spyOn(entityRepository, 'existsByEmail').mockResolvedValue(true);
       await expect(service.create(createDto)).rejects.toBeInstanceOf(DomainError);
     });
     it('should throw NameAlreadyExists error', async () => {
-      jest.spyOn(entityRepository, 'existsByName').mockResolvedValue(true);
+      jest.spyOn(entityRepository, 'existsByUserName').mockResolvedValue(true);
       jest.spyOn(entityRepository, 'existsByEmail').mockResolvedValue(false);
       await expect(service.create(createDto)).rejects.toBeInstanceOf(DomainError);
     });
