@@ -1,21 +1,43 @@
-import { INestApplication } from '@nestjs/common';
+import { VersioningType } from '@nestjs/common';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app/app.module';
 
+async function createApp(): Promise<NestFastifyApplication> {
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
+
+  const app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+  app.enableVersioning({ type: VersioningType.URI });
+  await app.init();
+  await app.listen(0);
+  return app;
+}
+
 describe('AppController (e2e)', () => {
-  let app: INestApplication;
+  let app: NestFastifyApplication;
+  let httpServer: ReturnType<NestFastifyApplication['getHttpServer']>;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    app = await createApp();
+    httpServer = app.getHttpServer();
   });
 
-  it('/ (GET version)', () => {
-    return request(app.getHttpServer()).get('/').expect(200);
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('/ (GET version)', async () => {
+    await request(httpServer).get('/').expect(200);
+  });
+
+  it('/health (GET health check)', async () => {
+    const res = await request(httpServer).get('/health').expect(200);
+
+    expect(res.body).toMatchObject({ status: 'ok' });
+    expect(res.body).toHaveProperty('services');
+    expect(res.body.services).toHaveProperty('mongodb');
   });
 });

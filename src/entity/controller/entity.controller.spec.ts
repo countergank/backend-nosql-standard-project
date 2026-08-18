@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Mock } from '../../../test/helpers';
+import { Mock } from '../../../test/helpers/mock';
 import { ICACHE_SERVICE } from '../../common/cache/cache.service';
 import { CreateEntityResponseDTO } from '../dto/create-entity-response.dto';
 import { EntityDTO } from '../dto/entity.dto';

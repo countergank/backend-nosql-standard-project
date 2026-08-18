@@ -36,8 +36,8 @@ export class EntityRepository implements OnApplicationBootstrap {
     }
   }
 
-  async existsByName(name: string): Promise<boolean> {
-    const exists = await this.entityModel.exists({ name }).exec();
+  async existsByUserName(userName: string): Promise<boolean> {
+    const exists = await this.entityModel.exists({ userName }).exec();
     return Boolean(exists);
   }
 

@@ -27,12 +27,12 @@ export class EntityService {
   ) {}
 
   async create(createEntityDTO: CreateEntityDTO): Promise<Entity> {
-    const [entitynameAlreadyExists, emailAlreadyExists] = await Promise.all([
-      this.entityRepository.existsByName(createEntityDTO.userName),
+    const [userNameAlreadyExists, emailAlreadyExists] = await Promise.all([
+      this.entityRepository.existsByUserName(createEntityDTO.userName),
       this.entityRepository.existsByEmail(createEntityDTO.email),
     ]);
 
-    if (entitynameAlreadyExists) {
+    if (userNameAlreadyExists) {
       throw DomainError.fromKind('ENTITY_NAME_ALREADY_EXISTS');
     }
     if (emailAlreadyExists) {
