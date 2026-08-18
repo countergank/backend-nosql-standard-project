@@ -1,170 +1,230 @@
 # CounterGank Backend NoSQL Standard Project
 
-Este proyecto es un backend desarrollado con [NestJS](https://nestjs.com/) y [MongoDB](https://www.mongodb.com/) (a través de Mongoose), diseñado para servir como base estándar para aplicaciones que requieren arquitectura de microservicios y persistencia NoSQL.
+Backend desarrollado con [NestJS](https://nestjs.com/) y [MongoDB](https://www.mongodb.com/) (vía Mongoose), pensado como base estándar para aplicaciones con persistencia NoSQL, configuración en runtime y arquitectura modular escalable.
 
-## Características principales
+## Stack
 
-- **NestJS** como framework principal para la estructura modular y escalable.
-- **MongoDB** como base de datos NoSQL, usando Mongoose para la integración ODM.
-- **Microservicios**: Soporte para integración y comunicación con microservicios externos, habilitados/deshabilitados por variables de entorno.
-- **Configuración centralizada** usando `@nestjs/config`.
-- **Logger personalizado** para trazabilidad y debugging.
-- **Pruebas unitarias** con Jest.
-- **Estructura limpia** y desacoplada para facilitar la extensión y el mantenimiento.
+- **NestJS 11** con adaptador **Fastify**
+- **MongoDB** a través de **Mongoose** (ODM)
+- **Redis** opcional para cache (degradación graceful sin Redis)
+- **Doppler** para gestión de secretos
+- **Biome** para lint/format
+- **Jest** para unit + e2e tests
+- **Scalar** + **Swagger UI** para documentación de API
+
+## Características
+
+- **Parameter Store**: gestión de configuración en runtime (`@Parameter` decorator, resolución L1 → env → Redis → default, admin API).
+- **Cache**: capa de cache con `ICACHE_SERVICE`, fallback in-memory sin Redis.
+- **Entity CRUD**: creación y consulta de entidades con cache y validación.
+- **Microservicios**: integración opcional con microservicios externos vía `ClientProxy`, controlada por env vars.
+- **Observabilidad**: logger estructurado (`nestjs-pino`), `x-trace-id`, health check.
+- **Errores tipados**: `DomainError` con códigos HTTP estables (401/404/409/422/500).
+
+## Requisitos
+
+- Node.js **22** (ver `.nvmrc`)
+- MongoDB **6+** (o `docker compose` con Mongo incluido)
+- Redis **7** (opcional)
+- Docker + Docker Compose (para desarrollo con contenedores)
+
+## Instalación
+
+```bash
+# Instalar dependencias
+npm ci
+
+# Configurar variables de entorno
+cp .env.example .env
+# Completar los valores en .env (o usar Doppler)
+```
+
+## Variables de entorno
+
+| Variable | Requerida | Descripción |
+|----------|-----------|-------------|
+| `NODE_ENV` | ✅ | `development`, `test` o `production` |
+| `HOST` | ✅ | Host de escucha (default `0.0.0.0`) |
+| `PORT` | ✅ | Puerto HTTP (default `3001`) |
+| `DATABASE_HOST` | ✅ | Host de MongoDB |
+| `DATABASE_PORT` | ✅ | Puerto de MongoDB |
+| `DATABASE_NAME` | ✅ | Nombre de la base de datos |
+| `DATABASE_USER` | ✅ | Usuario de MongoDB |
+| `DATABASE_PASSWORD` | ✅ | Password de MongoDB (via Doppler) |
+| `ENCRYPTION_PASSWORD` | ✅ | Clave de cifrado (via Doppler) |
+| `EXAMPLE_MICROSERVICE_ENABLED` | ✅ | `true`/`false` — habilita el microservicio de ejemplo |
+| `EXAMPLE_MICROSERVICE_HOST` | ✅ | Host del microservicio |
+| `EXAMPLE_MICROSERVICE_PORT` | ✅ | Puerto del microservicio |
+| `REDIS_URL` | ❌ | URL de Redis (opcional, cache) |
+| `ADMIN_API_TOKEN` | ❌ | Token del admin API (401 si no está) |
+| `ENTITY_CACHE_TTL_MS` | ❌ | Override en runtime del TTL de cache |
+
+Los secretos sensibles (`DATABASE_PASSWORD`, `ENCRYPTION_PASSWORD`) se gestionan con Doppler y **no** deben versionarse.
+
+## Doppler Setup
+
+El proyecto usa [Doppler](https://www.doppler.com/) para secretos. Instalar el CLI:
+
+```bash
+curl -sLf https://dl.doppler.com/cli/install.sh | sh
+```
+
+```bash
+doppler login
+doppler init
+doppler secrets set DATABASE_PASSWORD=tu_password
+doppler secrets set ENCRYPTION_PASSWORD=tu_password
+```
+
+El target `make dev` detecta Doppler automáticamente y usa `doppler run` si está disponible.
+
+## Ejecutar
+
+```bash
+# Desarrollo local (con hot reload)
+make dev
+
+# O directamente
+npm run start:dev
+```
+
+## Docker
+
+```bash
+# Desarrollo local (build de la imagen con target development)
+make docker-up
+
+# Logs
+make docker-logs
+
+# Bajar
+make docker-down
+
+# Redesplegar (down + build + up)
+make docker-redeploy
+```
+
+### Imagen de producción (GHCR)
+
+La imagen de producción se publica en GitHub Container Registry (`ghcr.io/countergank/backend-nosql-standard-project`) y se levanta con un compose aparte:
+
+```bash
+# Pull de la imagen pre-buildeada de GHCR (sin build local)
+make docker-ghcr-up
+
+# Logs
+make docker-ghcr-logs
+
+# Bajar
+make docker-ghcr-down
+```
+
+Ver `docker-compose.ghcr.yml` y el workflow `.github/workflows/release-docker-image.yml` (se dispara con tags `v*`).
+
+## Documentación de API
+
+- **Scalar** (interactivo): http://localhost:3001/reference/
+- **Swagger UI** (clásico): http://localhost:3001/docs
+
+## Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/` | Versión del servicio |
+| GET | `/health` | Health check (MongoDB) |
+| POST | `/message-microservice/:pattern` | Proxy a microservicio (si está habilitado) |
+| POST | `/v1/entity/create` | Crear entidad |
+| GET | `/v1/entity` | Listar entidades |
+| GET | `/v1/entity/:id` | Obtener entidad por id |
+| GET | `/v1/admin/parameters` | Listar parámetros (admin) |
+| GET | `/v1/admin/parameters/:group` | Parámetros por grupo (admin) |
+| PUT | `/v1/admin/parameters/:key` | Actualizar parámetro (admin) |
+
+## Pruebas
+
+```bash
+# Unit tests
+npm test
+
+# Solo el último commit
+npm run test:local
+
+# Cobertura
+npm run test:cov
+
+# E2E tests (requiere MongoDB)
+npm run test:e2e
+```
+
+Los e2e corren contra MongoDB real (servicio `mongo:7` en CI, o `MongoMemoryServer` local). Helpers en `test/helpers/` (`mock.ts`, `mongo.ts`).
+
+## Scripts
+
+| Script | Descripción |
+|--------|-------------|
+| `npm run start:dev` | Servidor con watch |
+| `npm run build` | Compilar |
+| `npm run lint` | Lint (Biome) |
+| `npm run test` | Unit tests |
+| `npm run test:e2e` | E2E tests |
+| `npm run install:skills` | Reinstalar agent skills |
+
+## Makefile
+
+```bash
+make help          # Lista todos los targets
+make dev           # Dev server (con Doppler si está)
+make test          # Unit tests
+make test-e2e      # E2E tests
+make lint          # Lint
+make docker-up     # Dev local (build)
+make docker-ghcr-up # Producción (pull GHCR)
+```
 
 ## Estructura del proyecto
 
 ```
 src/
-├── app/
-│   ├── controller/
-│   ├── service/
-│   ├── class/
-│   └── errors/
-├── common/
-│   ├── class/
-│   ├── logger.ts
-│   └── utils/
-├── config/
-│   ├── custom-module-options/
-│   ├── custom-providers/
-│   └── ...
-├── entity/
-│   └── ...
+├── app/                 # AppController (/, /health, microservice)
+├── common/              # Errores, cache, filtros, middlewares, pipes
+├── config/              # ConfigModule, env validation, parameters, microservices
+├── entity/              # Entity module (controller, service, repository, dto, schema)
 test/
-├── helpers.ts
-.env
+├── helpers/             # mock.ts, mongo.ts
+├── *.e2e-spec.ts        # Tests e2e
+openspec/
+├── specs/               # Specs del proyecto
+└── changes/             # Cambios SDD activos y archivados
 ```
 
-## Configuración
+## Git workflow
 
-El comportamiento del backend y la conexión a microservicios se controla mediante variables de entorno. Ejemplo de configuración en `.env`:
+El flujo de ramas sigue la skill `git-environment-flow`:
 
-```env
-MONGO_URI=mongodb://localhost:27017/countergank
-EXAMPLE_MICROSERVICE_ENABLED=true
-EXAMPLE_MICROSERVICE_HOST=127.0.0.1
-EXAMPLE_MICROSERVICE_PORT=4000
-NODE_ENV=development
-npm_package_name=countergank-backend
-npm_package_version=1.0.0
+```
+feature → develop → release/x.y.z → staging → main
 ```
 
-## Doppler Setup
-
-Este proyecto usa [Doppler](https://www.doppler.com/) para gestionar secretos de forma segura. Los secretos sensibles (como `DATABASE_PASSWORD` y `ENCRYPTION_PASSWORD`) se inyectan en runtime mediante `doppler run`, sin escribirse en disco ni embebidos en la imagen Docker.
-
-### Requisitos previos
-
-- Crear una cuenta en [Doppler](https://dashboard.doppler.com/)
-- Instalar el CLI: `curl -FsSL https://dl.doppler.com/cli/install.sh | sh`
-
-### Configuración inicial
-
-```bash
-# 1. Login en Doppler
-doppler login
-
-# 2. Inicializar el proyecto (desde la raíz del repo)
-doppler init
-
-# 3. Configurar los secretos necesarios
-doppler secrets set DATABASE_PASSWORD=tu_password
-doppler secrets set ENCRYPTION_PASSWORD=tu_password
-doppler secrets set MONGO_URI=mongodb://localhost:27017/countergank
-doppler secrets set NODE_ENV=development
-
-# 4. Verificar que funciona
-doppler run node -e "console.log(process.env.DATABASE_PASSWORD)"
-```
-
-### Desarrollo local
-
-```bash
-# Con Doppler instalado (recomendado)
-make dev
-
-# Sin Doppler (fallback automático con warning)
-make dev
-```
-
-El target `dev` del Makefile detecta automáticamente si Doppler está instalado y usa `doppler run` si está disponible, o cae en fallback directo con un mensaje de advertencia.
-
-### Docker
-
-```bash
-# La imagen de producción usa doppler run como CMD
-docker compose up
-
-# El token se pasa desde el host
-DOPPLER_TOKEN=tu_token docker compose up
-```
-
-### Migración desde `.env`
-
-Si tenés secretos existentes en archivos `.env`, importalos a Doppler:
-
-```bash
-# Importar secretos individuales
-doppler secrets set DATABASE_USER=usuario
-doppler secrets set DATABASE_PASSWORD=password
-
-# O importar desde archivo .env (sin las líneas de comentarios)
-grep -v '^#' .env | grep -v '^\s*$' | while IFS='=' read -r key value; do
-  doppler secrets set "$key=$value"
-done
-```
-
-**Nota**: Las variables no secretas (`VERSION`, `HOST`, `PORT`, `NODE_ENV`, etc.) pueden quedarse en `.env` o pasarse como variables de entorno directamente.
-
-## Uso de microservicios
-
-El backend puede conectarse a microservicios externos si la variable `*_MICROSERVICE_ENABLED` está en `true`. La conexión se realiza automáticamente al iniciar la aplicación.
+Los PRs apuntan a `develop`. Tags de release: `vX.Y.Z` en main, `vX.Y.Z-rcN` en staging.
 
 ## Agent Skills
 
-Este proyecto incluye skills de agentes AI instalados desde [countergank/skills](https://github.com/countergank/skills):
+Skills instaladas desde [countergank/skills](https://github.com/countergank/skills):
 
-- **nestjs-backend**: Patrones y mejores prácticas para desarrollo NestJS
-- **github-conventions**: Convenciones de commits, PRs y branching
-- **git-environment-flow**: Flujo de ramas de entorno y promoción
+- **nestjs-backend**: patrones y mejores prácticas NestJS
+- **github-conventions**: commits, PRs, branches
+- **git-environment-flow**: flujo de ramas de entorno
 
-Las skills se instalan en `.agents/skills/` (no `.opencode/skills/`). Para reinstalar:
-
-```bash
-npm run install:skills
-```
-
-**Nota**: El CLI `npx skills` instala en `.agents/skills/` para OpenCode. Si usás otros agentes (Claude Code, etc.), pueden usar `.claude/skills/` (excluido de git via `.gitignore`).
-
-## Scripts
-
-- `npm run start`: Inicia el servidor en modo desarrollo.
-- `npm run build`: Compila el proyecto.
-- `npm run test`: Ejecuta las pruebas unitarias.
-- `npm run install:skills`: Reinstala las skills del agente AI.
-
-## Pruebas
-
-Las pruebas unitarias están ubicadas en la carpeta `test/` y junto a los controladores/servicios. Se utiliza Jest como framework de testing.
-
-## Extensión
-
-Puedes agregar nuevos microservicios siguiendo el patrón de `MicroserviceFactory` y agregando las variables de entorno correspondientes.
-
-## Requisitos
-
-- Node.js >= 18.x
-- MongoDB >= 4.x
+Reinstalar: `npm run install:skills`
 
 ## Contribución
 
-1. Haz un fork del repositorio.
-2. Crea una rama para tu feature o fix.
-3. Haz tus cambios y asegúrate de que las pruebas pasen.
-4. Haz un pull request.
+1. Crear rama `feat/`, `fix/`, `chore/` etc. desde `develop`
+2. Hacer cambios con commits convencionales
+3. Asegurar que `npm test` y `npm run lint` pasen
+4. Abrir PR a `develop`
 
 ---
 
-**Autor:** Leandro Javier Cepeda  
+**Autor:** Leandro Javier Cepeda
 **Licencia:** MIT
