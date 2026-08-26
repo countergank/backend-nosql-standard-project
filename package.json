@@ -21,7 +21,7 @@
     "test:cov": "jest --detectOpenHandles --coverage --forceExit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --detectOpenHandles --config ./test/jest-e2e.json --forceExit --collectCoverage=false",
-    "install:skills": "npx skills add countergank/skills --skill nestjs-backend --skill github-conventions --skill git-environment-flow --copy -y",
+    "install:skills": "npx skills add countergank/skills --skill nestjs-backend --skill github-conventions --skill git-environment-flow --agent opencode --copy -y",
     "prepare": "husky"
   },
   "dependencies": {
