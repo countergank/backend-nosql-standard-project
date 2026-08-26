@@ -1,6 +1,6 @@
 {
   "name": "backend-nosql-standard-project",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "API REST Standard nosql backend project",
   "author": "Leandro Javier Cepeda",
   "private": true,
