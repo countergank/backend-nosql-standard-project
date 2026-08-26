@@ -44,7 +44,7 @@ COPY --chown=node:node . .
 RUN npm run build
 
 # Install only production dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # Clean unnecessary files (optional)
 RUN rm -rf src test *.ts *.md .env*
