@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('Docker Compose Doppler Configuration', () => {
   const dockerComposePath = path.resolve(__dirname, '../../docker-compose.yml');
@@ -10,21 +10,20 @@ describe('Docker Compose Doppler Configuration', () => {
   });
 
   describe('API Service Environment', () => {
-    it('should include DOPPLER_TOKEN in environment', () => {
-      expect(dockerComposeContent).toMatch(/DOPPLER_TOKEN:\s*\$\{DOPPLER_TOKEN\}/);
+    it('should use npm start command', () => {
+      expect(dockerComposeContent).toMatch(/npm run start:dev/);
     });
 
-    it('should not have env_file directive', () => {
+    it('should have env_file directive', () => {
       const apiServiceSection = dockerComposeContent.split('api-backend-nosql-standard-project:')[1];
       expect(apiServiceSection).toBeDefined();
-      expect(apiServiceSection).not.toMatch(/env_file:/);
+      expect(apiServiceSection).toMatch(/env_file:/);
     });
   });
 
-  describe('Token Passed from Host', () => {
-    it('should use host environment variable syntax for DOPPLER_TOKEN', () => {
-      // ${DOPPLER_TOKEN} means it reads from the host shell environment
-      expect(dockerComposeContent).toMatch(/\$\{DOPPLER_TOKEN\}/);
+  describe('Doppler CLI Integration', () => {
+    it('should not use doppler run command', () => {
+      expect(dockerComposeContent).not.toMatch(/command:\s*doppler run/);
     });
 
     it('should not hardcode any token values', () => {

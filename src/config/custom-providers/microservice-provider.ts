@@ -1,15 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory } from '@nestjs/microservices';
-import { CustomLogger } from '../../common/logger';
+import { PinoLogger } from 'nestjs-pino';
 import { MicroservicesNames } from './microservices-names.enum';
 
 export const MicroserviceFactory = (name: MicroservicesNames) => {
   return {
     provide: String(name),
-    useFactory: (configService: ConfigService) => {
-      const logger = new CustomLogger(name);
+    useFactory: (configService: ConfigService, logger: PinoLogger) => {
       try {
-        // Lee la variable *_MICROSERVICE_ENABLED para saber si el microservicio está habilitado
         const microservice_enabled = configService.getOrThrow(`${name}_MICROSERVICE_ENABLED`);
         if (microservice_enabled === 'true') {
           const microservice_host = configService.getOrThrow(`${name}_MICROSERVICE_HOST`);
@@ -18,13 +16,13 @@ export const MicroserviceFactory = (name: MicroservicesNames) => {
             options: { host: microservice_host, port: microservice_port },
           });
         }
-        logger.log(`${name} microservice is disabled by configuration.`);
+        logger.info(`${name} microservice is disabled by configuration.`);
         return null;
       } catch (error) {
-        logger.warn(error);
+        logger.warn({ error }, `Error in ${name} microservice`);
         return null;
       }
     },
-    inject: [ConfigService],
+    inject: [ConfigService, PinoLogger],
   };
 };

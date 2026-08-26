@@ -1,4 +1,4 @@
-.PHONY: help install dev build lint test test-e2e docker-build docker-up docker-down docker-logs docker-redeploy
+.PHONY: help install dev build lint test test-e2e docker-build docker-up docker-down docker-logs docker-redeploy docker-ghcr-up docker-ghcr-down docker-ghcr-logs
 
 # Environment variables with sensible defaults
 NODE_ENV ?= local
@@ -50,3 +50,15 @@ docker-logs: ## Follow container logs
 	$(COMPOSE) logs -f
 
 docker-redeploy: docker-down docker-build docker-up ## Down, rebuild, and restart containers
+
+docker-health: ## Display service health status
+	$(COMPOSE) ps --format "table {{.Name}}\t{{.Status}}"
+
+docker-ghcr-up: ## Start containers using GHCR production image
+	$(COMPOSE) -f docker-compose.ghcr.yml up -d
+
+docker-ghcr-down: ## Stop containers started with GHCR image
+	$(COMPOSE) -f docker-compose.ghcr.yml down
+
+docker-ghcr-logs: ## Follow GHCR container logs
+	$(COMPOSE) -f docker-compose.ghcr.yml logs -f

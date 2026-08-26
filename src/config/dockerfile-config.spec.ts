@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('Dockerfile Configuration', () => {
   const dockerfilePath = path.resolve(__dirname, '../../Dockerfile');
@@ -11,7 +11,7 @@ describe('Dockerfile Configuration', () => {
 
   describe('Base Image', () => {
     it('should use node:20-alpine as base image', () => {
-      const baseImageLine = dockerfileContent.split('\n').find(line => line.includes('FROM node:'));
+      const baseImageLine = dockerfileContent.split('\n').find((line) => line.includes('FROM node:'));
       expect(baseImageLine).toBeDefined();
       expect(baseImageLine).toMatch(/FROM node:20-alpine/);
     });

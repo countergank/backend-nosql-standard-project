@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('Docker Build Configuration', () => {
   const dockerfilePath = path.resolve(__dirname, '../../Dockerfile');
@@ -27,9 +27,9 @@ describe('Docker Build Configuration', () => {
     it('should use Node.js 20 or later', () => {
       const nodeVersionMatches = dockerfileContent.match(/FROM node:(\d+)/g);
       expect(nodeVersionMatches).toBeDefined();
-      
-      nodeVersionMatches?.forEach(match => {
-        const version = parseInt(match.match(/node:(\d+)/)?.[1] || '0');
+
+      nodeVersionMatches?.forEach((match) => {
+        const version = Number.parseInt(match.match(/node:(\d+)/)?.[1] || '0');
         expect(version).toBeGreaterThanOrEqual(20);
       });
     });

@@ -1,7 +1,7 @@
 services:
   db-backend-nosql-standard-project:
     image: mongo:6.0.3
-    container_name: db-backend-nosql-standard-project_${NODE_ENV}-${VERSION}
+    container_name: db-backend-nosql-standard-project
     expose:
       - 27017
     restart: always
@@ -11,38 +11,67 @@ services:
       - db-backend-nosql-standard-project-data:/data/db
     environment:
       - MONGO_INITDB_DATABASE=${DATABASE_NAME}
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - default
 
   api-backend-nosql-standard-project:
     image: countergank/backend-nosql-standard-project:${NODE_ENV}-${VERSION}
-    container_name: api-backend-nosql-standard-project_${NODE_ENV}-${VERSION}
+    container_name: api-backend-nosql-standard-project
     restart: always
     build:
       dockerfile: Dockerfile
       context: .
       target: development
     depends_on:
-      - db-backend-nosql-standard-project
-    command: npm run start:debug
+      db-backend-nosql-standard-project:
+        condition: service_healthy
+    command: npm run start:dev
     ports:
       - ${PORT}:${PORT}
+    env_file:
+      - .env
     environment:
-      - DOPPLER_TOKEN: ${DOPPLER_TOKEN}
+      - DATABASE_PORT=27017
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     volumes:
       - .:/usr/src/app
     networks:
       - default
 
+  # Redis service (optional — uncomment to enable Redis caching)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-cache
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   networks:
+  #     - default
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
 volumes:
   db-backend-nosql-standard-project-data:
     driver: local
+  # redis-data:
+  #   driver: local
 
 networks:
   default:
     name: backend-nosql-standard-project-net
     driver: bridge
-
-  # microservice-name-net:
-  #   name: microservice-name-net
-  #   external: true

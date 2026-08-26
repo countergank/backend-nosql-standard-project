@@ -1,0 +1,165 @@
+project: backend-nosql-standard-project
+description: "API REST Standard nosql backend project"
+mode: hybrid
+strict_tdd: true
+
+stack:
+  runtime: node
+  language: typescript
+  framework: nestjs
+  database: mongodb
+  orm: mongoose
+  http_platform: fastify
+  module_system: commonjs
+  api_docs: "@nestjs/swagger"
+  validation: "class-validator + class-transformer"
+  microservices: "@nestjs/microservices"
+  build: "nest-cli"
+  in_memory_db: "mongodb-memory-server"
+
+architecture:
+  module_structure:
+    - src/app/
+    - src/common/
+    - src/config/
+    - src/encode/
+    - src/entity/
+  entry_point: src/main.ts
+  docker:
+    dockerfile: Dockerfile
+    compose: docker-compose.yml
+
+testing:
+  strict_tdd: true
+  runner:
+    command: "npm test"
+    framework: "jest"
+    version: "29.7.0"
+    transformer: "ts-jest@29.2.3"
+    config: "inline in package.json jest section"
+    timeout: 30000
+    root_dir: "src"
+    test_pattern: "*.spec.ts"
+  layers:
+    unit:
+      available: true
+      tool: "jest + ts-jest"
+      note: "10 spec files in src/"
+    integration:
+      available: true
+      tool: "@nestjs/testing + mongodb-memory-server@10.0.0"
+    e2e:
+      available: true
+      tool: "jest + supertest@7.0.0"
+      config: "test/jest-e2e.json"
+  commands:
+    unit: "npm test"
+    unit_watch: "npm run test:watch"
+    unit_coverage: "npm run test:cov"
+    e2e: "npm run test:e2e"
+    debug: "npm run test:debug"
+  coverage:
+    available: true
+    command: "npm run test:cov"
+    directory: "../coverage"
+    collect_from: "**/*.{!(module),}.(t|j)s"
+  quality:
+    linter:
+      available: true
+      command: "npm run lint"
+      tool: "biome@1.8.3"
+    type_checker:
+      available: true
+      command: "npm run build"
+      tool: "typescript@5.5.4"
+    formatter:
+      available: true
+      command: "npm run format"
+      tool: "biome@1.8.3"
+    lint_fix:
+      available: true
+      command: "npm run lint:fix"
+  infrastructure:
+    mocking: "jest-mock@29.7.0"
+    http_assertions: "supertest@7.0.0"
+    test_data: "@faker-js/faker@8.4.1"
+    in_memory_db: "mongodb-memory-server@10.0.0"
+    test_helpers_dir: "test/helpers"
+    husky_hooks:
+      pre_commit: "npm test"
+      pre_push: "npm run test"
+    test_flags: "--forceExit --maxWorkers=50% --detectOpenHandles --lastCommit"
+
+quality_tools:
+  linter:
+    command: "npm run lint"
+    tool: "biome@1.8.3"
+  formatter:
+    command: "npm run format"
+    tool: "biome@1.8.3"
+  type_checker:
+    command: "npm run build"
+    tool: "typescript@5.5.4"
+  lint_fix:
+    command: "npm run lint:fix"
+
+conventions:
+  module_system: commonjs
+  indent: 2
+  quotes: single
+  trailing_commas: true
+  line_width: 120
+  decorator_metadata: true
+  strict_null_checks: false
+  no_implicit_any: false
+  swagger_plugin: true
+
+ci:
+  provider: github_actions
+  workflows:
+    - ci.yml
+  jobs:
+    - commitlint
+    - lint
+    - build
+    - test
+    - e2e
+
+skills:
+  project:
+    - git-environment-flow
+    - github-conventions
+    - nestjs-backend
+  user:
+    - branch-pr
+    - chained-pr
+    - cognitive-doc-design
+    - comment-writer
+    - go-testing
+    - issue-creation
+    - judgment-day
+    - skill-creator
+    - skill-improver
+    - sdd-apply
+    - sdd-archive
+    - sdd-design
+    - sdd-explore
+    - sdd-init
+    - sdd-onboard
+    - sdd-propose
+    - sdd-spec
+    - sdd-tasks
+    - sdd-verify
+    - skill-registry
+    - work-unit-commits
+
+persistence:
+  mode: hybrid
+  engram:
+    project_context_topic: "sdd-init-zen-free/backend-nosql-standard-project"
+    testing_capabilities_topic: "sdd/backend-nosql-standard-project/testing-capabilities"
+    skill_registry_topic: "skill-registry/backend-nosql-standard-project"
+  openspec:
+    config_path: "openspec/config.yaml"
+    changes_dir: "openspec/changes"
+    specs_dir: "openspec/specs"

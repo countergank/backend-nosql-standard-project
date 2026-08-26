@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 describe('CORS Configuration in main.ts', () => {
   const mainTsPath = path.resolve(__dirname, '../src/main.ts');
@@ -19,9 +19,9 @@ describe('CORS Configuration in main.ts', () => {
       // PUT, PATCH, DELETE must be explicitly specified
       const corsMatch = mainTsContent.match(/enableCors\(([^)]*)\)/);
       expect(corsMatch).toBeDefined();
-      
+
       // Check if methods are explicitly configured
-      if (corsMatch && corsMatch[1]) {
+      if (corsMatch?.[1]) {
         const corsConfig = corsMatch[1];
         // If methods are configured, they should include common HTTP methods
         if (corsConfig.includes('methods')) {

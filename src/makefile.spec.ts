@@ -1,7 +1,7 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import * as fs from 'fs';
-import * as path from 'path';
+import { exec } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
@@ -21,7 +21,7 @@ describe('Makefile', () => {
       // Clear NODE_ENV from environment to test default value
       // IMPORTANT: do NOT pass NODE_ENV= on the make command line (command-line vars override Makefile logic)
       const cleanEnv = { ...process.env };
-      delete cleanEnv.NODE_ENV;
+      cleanEnv.NODE_ENV = undefined;
       const { stdout } = await execAsync('make -n dev', {
         cwd: projectRoot,
         env: cleanEnv,
@@ -146,11 +146,9 @@ describe('Makefile', () => {
       const content = fs.readFileSync(makefilePath, 'utf8');
       // docker-redeploy must have dependencies (docker-down docker-build docker-up)
       // Make stops execution if any dependency fails
-      const redeployMatch = content.match(
-        /^docker-redeploy:\s*(.+)$/m,
-      );
+      const redeployMatch = content.match(/^docker-redeploy:\s*(.+)$/m);
       expect(redeployMatch).not.toBeNull();
-      const deps = redeployMatch![1].split(/\s+/);
+      const deps = redeployMatch?.[1].split(/\s+/);
       expect(deps).toContain('docker-down');
       expect(deps).toContain('docker-build');
       expect(deps).toContain('docker-up');
@@ -163,9 +161,7 @@ describe('Makefile', () => {
       // help output should include at least the core targets
       const lines = stdout.split('\n').filter((l) => l.trim().length > 0);
       // Should have "Targets:" header + at least 10 targets
-      const targetLines = lines.filter(
-        (l) => l.includes('install') || l.includes('dev') || l.includes('build'),
-      );
+      const targetLines = lines.filter((l) => l.includes('install') || l.includes('dev') || l.includes('build'));
       expect(targetLines.length).toBeGreaterThanOrEqual(3);
     });
 
@@ -173,11 +169,9 @@ describe('Makefile', () => {
       const makefilePath = path.join(projectRoot, 'Makefile');
       const content = fs.readFileSync(makefilePath, 'utf8');
       // All targets with ## comments should be parseable by the grep pattern
-      const targetsWithDocs = content.match(
-        /^[a-zA-Z][a-zA-Z0-9_-]*:.*?## .+$/gm,
-      );
+      const targetsWithDocs = content.match(/^[a-zA-Z][a-zA-Z0-9_-]*:.*?## .+$/gm);
       expect(targetsWithDocs).not.toBeNull();
-      expect(targetsWithDocs!.length).toBeGreaterThanOrEqual(12);
+      expect(targetsWithDocs?.length).toBeGreaterThanOrEqual(12);
     });
   });
 
@@ -186,12 +180,10 @@ describe('Makefile', () => {
       const makefilePath = path.join(projectRoot, 'Makefile');
       const content = fs.readFileSync(makefilePath, 'utf8');
       const lines = content.split('\n');
-      const targetLines = lines.filter(
-        (line) => line.match(/^[a-zA-Z][\w-]*:/) && !line.startsWith('#'),
-      );
+      const targetLines = lines.filter((line) => line.match(/^[a-zA-Z][\w-]*:/) && !line.startsWith('#'));
 
       for (const line of targetLines) {
-        const targetName = line.split(':')[0];
+        const _targetName = line.split(':')[0];
         const targetIndex = lines.indexOf(line);
         const nextLine = lines[targetIndex + 1];
 

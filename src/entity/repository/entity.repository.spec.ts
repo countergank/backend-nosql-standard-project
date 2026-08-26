@@ -2,7 +2,8 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
-import { clearMongoCollection, clearMongoConnection, createConnection } from '../../../test/helpers';
+import { LoggerModule } from 'nestjs-pino';
+import { clearMongoCollection, clearMongoConnection, createConnection } from '../../../test/helpers/mongo';
 import { EncodeService } from '../../encode/encode.service';
 import { HashMock } from '../../encode/mocks/hash.mock';
 import { Entity, EntitySchema } from '../entities/entity.entity';
@@ -24,6 +25,13 @@ describe(EntityRepository.name, () => {
     newMongoConnection = mongoConnection;
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        LoggerModule.forRoot({
+          pinoHttp: {
+            level: 'silent',
+          },
+        }),
+      ],
       providers: [
         EntityRepository,
         EncodeService,
@@ -68,10 +76,10 @@ describe(EntityRepository.name, () => {
     });
   });
 
-  describe(`${EntityRepository.name}.${EntityRepository.prototype.existsByName.name}`, () => {
+  describe(`${EntityRepository.name}.${EntityRepository.prototype.existsByUserName.name}`, () => {
     it(`should be return if ${Entity.name} exists by name`, async () => {
       const entity = await repository.create(new EntityMock());
-      await expect(repository.existsByName(entity.name)).resolves.toBe(true);
+      await expect(repository.existsByUserName(entity.userName)).resolves.toBe(true);
     });
   });
 
