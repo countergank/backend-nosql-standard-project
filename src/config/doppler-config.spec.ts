@@ -38,7 +38,7 @@ describe('Doppler Configuration', () => {
     it('should use bare node command in production CMD (Doppler optional)', () => {
       const productionSection = dockerfileContent.split('PRODUCTION STAGE')[1];
       expect(productionSection).toBeDefined();
-      expect(productionSection).toMatch(/CMD \["node", "dist\/main\.js"\]/);
+      expect(productionSection).toMatch(/CMD \["node", "dist\/src\/main\.js"\]/);
     });
 
     it('should NOT require Doppler in production CMD', () => {
