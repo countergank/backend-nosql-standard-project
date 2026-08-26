@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  commitlint:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-node
+
+      - run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --git-log-args "--first-parent" --verbose
+
+  lint:
+    name: Biome Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-node
+
+      - run: npm run lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-node
+
+      - run: npm run build
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-node
+
+      - name: Run tests
+        run: npm run test:ci
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-node
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+        env:
+          DATABASE_HOST: localhost
+          DATABASE_PORT: '27017'
+          DATABASE_USER: test
+          DATABASE_PASSWORD: test
+          DATABASE_NAME: backend-nosql
+          ADMIN_API_TOKEN: e2e-admin-token
+          NODE_ENV: test
