@@ -35,17 +35,17 @@ describe('Doppler Configuration', () => {
   });
 
   describe('Production CMD', () => {
-    it('should use doppler run wrapper in production CMD', () => {
+    it('should use bare node command in production CMD (Doppler optional)', () => {
       const productionSection = dockerfileContent.split('PRODUCTION STAGE')[1];
       expect(productionSection).toBeDefined();
-      expect(productionSection).toMatch(/CMD \["doppler", "run", "--", "node", "dist\/main\.js"\]/);
+      expect(productionSection).toMatch(/CMD \["node", "dist\/src\/main\.js"\]/);
     });
 
-    it('should NOT use bare node command in production CMD', () => {
+    it('should NOT require Doppler in production CMD', () => {
       const productionSection = dockerfileContent.split('PRODUCTION STAGE')[1];
       expect(productionSection).toBeDefined();
-      // Should not have CMD ["node", "dist/main.js"] without doppler
-      expect(productionSection).not.toMatch(/CMD \["node", "dist\/main\.js"\]/);
+      // Doppler is optional - users can override CMD if needed
+      expect(productionSection).not.toMatch(/CMD \["doppler"/);
     });
   });
 
