@@ -1,16 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ExampleService } from './example.service';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateExampleDto } from './dto/create-example.dto';
 import { ExampleResponseDto } from './dto/example-response.dto';
+import { ExampleService } from './example.service';
 
 @ApiTags('examples')
 @Controller('examples')
@@ -20,7 +12,6 @@ export class ExampleController {
   @Post()
   @ApiOperation({ summary: 'Create a new example' })
   @ApiResponse({ status: 201, type: ExampleResponseDto })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async create(@Body() dto: CreateExampleDto): Promise<ExampleResponseDto> {
     return this.exampleService.create(dto);
   }
