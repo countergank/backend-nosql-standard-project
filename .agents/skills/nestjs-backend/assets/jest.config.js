@@ -13,5 +13,10 @@ module.exports = {
       lines: 80,
     },
   },
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.module.ts', '!src/main.ts', '!src/**/*.dto.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.module.ts',
+    '!src/main.ts',
+    '!src/**/*.dto.ts',
+  ],
 };
